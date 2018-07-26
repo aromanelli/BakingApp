@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- By default, Auto Backup includes almost all app files. If you specify an <include>
+    element, the system no longer includes any files by default and backs up only the files
+    specified. To include multiple files, use multiple <include> elements.
+
+    The following sample backs up all shared preferences except device.xml:
+    <include domain="sharedpref" path="."/>
+    <exclude domain="sharedpref" path="device.xml"/>
+
+    NOTE! <exclude> takes precedence.
+    -->
+
+    <!-- Exclude specific shared preferences that contain GCM registration Id -->
+
+    <!-- Here are some files that are typically excluded from backup:
+    * Files that have device specific identifiers, either issued by a server or generated on
+    the device. For example, Google Cloud Messaging (GCM) needs to generate a registration token
+    every time a user installs your app on a new device. If the old registration token is restored,
+    the app may behave unexpectedly.
+    * Account credentials or other sensitive information. Consider asking the user to reauthenticate
+    the first time they launch a restored app rather than allowing for storage of such information
+    in the backup.
+    * Files related to app debugging, such as instant run files. To exclude instant run files, add
+    the rule <exclude domain="file" path="instant-run"/>
+    * Large files that cause the app to exceed the 25MB backup quota.
+    -->
+</full-backup-content>
+<!-- https://developer.android.com/guide/topics/data/autobackup#IncludingFiles -->

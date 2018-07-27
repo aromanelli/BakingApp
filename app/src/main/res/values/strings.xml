@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">Udacity Baking App</string>
+    <string name="app_name">Baking Time</string>
+    <string name="hello_world">Hello World!</string>
 </resources>

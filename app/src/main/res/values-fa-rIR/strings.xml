@@ -2,4 +2,6 @@
 <resources>
     <string name="app_name">زمان پخت</string>
     <string name="hello_world">سلام دنیا!</string>
+    <string name="msg_retrieving_data">گرفتن اطلاعات</string>
+    <string name="msg_offline">آفلاین</string>
 </resources>

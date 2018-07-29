@@ -16,6 +16,17 @@ final class IngredientsData implements Parcelable {
     @SerializedName("ingredient")
     private String mIngredient;
 
+    @Override
+    public String toString() {
+        return "IngredientsData{" +
+                "mQuantity=" + mQuantity +
+                ", mMeasure='" + mMeasure + '\'' +
+                ", mIngredient='" + mIngredient + '\'' +
+                '}';
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+
     @SuppressWarnings("WeakerAccess")
     protected IngredientsData(Parcel in) {
         mQuantity = in.readFloat();

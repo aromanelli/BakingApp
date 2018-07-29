@@ -22,6 +22,19 @@ final class StepsData implements Parcelable {
     @SerializedName("thumbnailURL")
     private String mURLThumbnail;
 
+    @Override
+    public String toString() {
+        return "StepsData{" +
+                "mId=" + mId +
+                ", mShortDescription='" + mShortDescription + '\'' +
+                ", mDescription='" + mDescription + '\'' +
+                ", mURLVideo='" + mURLVideo + '\'' +
+                ", mURLThumbnail='" + mURLThumbnail + '\'' +
+                '}';
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+
     @SuppressWarnings("WeakerAccess")
     protected StepsData(Parcel in) {
         mId = in.readInt();

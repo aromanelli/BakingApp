@@ -29,6 +29,44 @@ public final class RecipeData implements Parcelable {
     @SerializedName("image")
     private String mImage;
 
+    public int getId() {
+        return mId;
+    }
+
+    public String getName() {
+        return mName;
+    }
+
+    public List<IngredientsData> getIngredients() {
+        return mIngredients;
+    }
+
+    public List<StepsData> getSteps() {
+        return mSteps;
+    }
+
+    public int getServings() {
+        return mServings;
+    }
+
+    public String getImage() {
+        return mImage;
+    }
+
+    @Override
+    public String toString() {
+        return "\nRecipeData{" +
+                "mId=" + mId +
+                ", mName='" + mName + '\'' +
+                ", mServings=" + mServings +
+                ", mImage='" + mImage + '\'' +
+                ",\n\tmIngredients=" + mIngredients +
+                ",\n\tmSteps=" + mSteps +
+                "}";
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+
     @SuppressWarnings("WeakerAccess")
     protected RecipeData(Parcel in) {
         mId = in.readInt();

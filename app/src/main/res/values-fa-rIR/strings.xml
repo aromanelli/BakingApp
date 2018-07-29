@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">زمان پخت</string>
-    <string name="hello_world">سلام دنیا!</string>
     <string name="msg_retrieving_data">گرفتن اطلاعات</string>
     <string name="msg_offline">آفلاین</string>
+    <string name="recipe_picture_desc">یک تصویر از دستور غذا</string>
+    <plurals name="number_of_servings">
+        <item quantity="one">%d نفر را خدمت می کند</item>
+        <item quantity="other">%d نفر را خدمت می کند</item>
+    </plurals>
+    <string name="msg_cant_offline">شما باید آنلاین باشید تا بتوانید از این برنامه استفاده کنید!</string>
+    <string name="msg_ok">باشه</string>
+    <string name="msg_close">بستن</string>
 </resources>

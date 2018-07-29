@@ -13,29 +13,26 @@ public final class NetUtil {
     final static private String TAG = NetUtil.class.getSimpleName();
 
     static public boolean ifOnline(final Context context) {
-        Log.d(TAG, "ifOnline() called with: context = [" + context + "] " + Thread.currentThread().getName());
         if (isOnline(context)) {
-            Log.d(TAG, "ifOnline() returning 'true' context = [" + context + "] " + Thread.currentThread().getName());
+            Log.d(TAG, "ifOnline() returning 'true', context = [" + context + "] ");
             return true;
         }
         else {
-            Log.d(TAG, "ifOnline() returning 'false' context = [" + context + "] " + Thread.currentThread().getName());
+            Log.d(TAG, "ifOnline() returning 'false', context = [" + context + "] ");
             AppUtil.showToast(context, context.getString(R.string.msg_offline), false);
             return false;
         }
     }
 
     static public boolean isOnline(final Context context) {
-        Log.d(TAG, "isOnline() called with: context = [" + context + "] " + Thread.currentThread().getName());
-        final boolean flag;
+        boolean flag = false;
         ConnectivityManager cm =
                 (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         if (cm != null) {
             NetworkInfo netInfo = cm.getActiveNetworkInfo();
-            flag = (netInfo != null) && netInfo.isConnectedOrConnecting();
+            flag = (netInfo != null) && netInfo.isConnected();
         } else {
-            Log.w(TAG, "isOnline: Unable to obtain a ConnectivityManager reference! " + Thread.currentThread().getName());
-            flag = false;
+            Log.w(TAG, "Device is offline.");
         }
         Log.d(TAG, "isOnline: Online? " + flag);
         return flag;

@@ -1,6 +1,13 @@
 <resources>
     <string name="app_name">Baking Time</string>
-    <string name="hello_world">Hello World!</string>
     <string name="msg_retrieving_data">Getting Information</string>
     <string name="msg_offline">Offline</string>
+    <string name="recipe_picture_desc">A picture of the recipe</string>
+    <plurals name="number_of_servings">
+        <item quantity="one">%d serving</item>
+        <item quantity="other">%d servings</item>
+    </plurals>
+    <string name="msg_cant_offline">You must be online, to be able to use this application!</string>
+    <string name="msg_ok">OK</string>
+    <string name="msg_close">Close</string>
 </resources>

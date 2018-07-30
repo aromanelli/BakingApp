@@ -23,8 +23,8 @@
 
         <ImageView
             android:id="@+id/recipe_picture"
-            android:layout_width="96dp"
-            android:layout_height="96dp"
+            android:layout_width="@dimen/recipe_image_size"
+            android:layout_height="@dimen/recipe_image_size"
             android:layout_marginBottom="8dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
@@ -38,7 +38,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:textSize="24sp"
+            android:textSize="@dimen/recipe_name_size"
             app:layout_constraintStart_toEndOf="@+id/recipe_picture"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -47,7 +47,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:textSize="14sp"
+            android:textSize="@dimen/recipe_servings_size"
             app:layout_constraintStart_toEndOf="@+id/recipe_picture"
             app:layout_constraintTop_toBottomOf="@+id/recipe_name" />
 

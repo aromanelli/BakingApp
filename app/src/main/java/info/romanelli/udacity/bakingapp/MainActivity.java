@@ -2,6 +2,7 @@ package info.romanelli.udacity.bakingapp;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -41,8 +42,13 @@ public class MainActivity
 
         mViewRecipes = findViewById(R.id.rv_recipes);
         mViewRecipes.setHasFixedSize(true);
-        // TODO AOR Figure out correct layout manager for multiple columns in tablet in landscape
-        GridLayoutManager layoutManager = new GridLayoutManager(this, 1);
+
+        // Determine how many columns of cards should be displayed.  Uses view_sizing.xml and orientation.
+        int numberOfCardCols = getResources().getInteger(R.integer.recipe_view_num_of_cols);
+        if (Configuration.ORIENTATION_LANDSCAPE == this.getResources().getConfiguration().orientation) {
+            numberOfCardCols++;
+        }
+        GridLayoutManager layoutManager = new GridLayoutManager(this, numberOfCardCols);
         mViewRecipes.setLayoutManager(layoutManager);
 
         mAdapterRecipes = new RecipesAdapter(this);

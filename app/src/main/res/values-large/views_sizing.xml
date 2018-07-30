@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="recipe_image_size">128dp</dimen>
+    <dimen name="recipe_name_size">32sp</dimen>
+    <dimen name="recipe_servings_size">18sp</dimen>
+    <integer name="recipe_view_num_of_cols">2</integer>
+</resources>

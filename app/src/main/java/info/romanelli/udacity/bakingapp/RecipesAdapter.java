@@ -99,7 +99,6 @@ public class RecipesAdapter extends RecyclerView.Adapter<RecipesAdapter.ViewHold
                             @Override
                             public void onError(Exception e) {
                                 Log.e(TAG, "Picasso:onError: ", e);
-                                // TODO AOR Load the 'error' image
                                 holder.ivRecipePicture.setImageResource(R.drawable.ic_baseline_error_outline_24px);
                             }
                         }

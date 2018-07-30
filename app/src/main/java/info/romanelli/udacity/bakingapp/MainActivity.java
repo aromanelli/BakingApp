@@ -2,6 +2,7 @@ package info.romanelli.udacity.bakingapp;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -110,10 +111,9 @@ public class MainActivity
         final Bundle bundle = new Bundle(1);
         bundle.putParcelable(KEY_RECIPE_DATA, recipe);
 
-        // TODO AOR Activate below code
-//        final Intent intent = new Intent(MainActivity.this, RecipeDetailActivity.class);
-//        intent.putExtras(bundle);
-//        startActivity(intent);
+        final Intent intent = new Intent(MainActivity.this, RecipeInfoActivity.class);
+        intent.putExtras(bundle);
+        startActivity(intent);
     }
 
 }

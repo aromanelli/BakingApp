@@ -20,6 +20,24 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".RecipeInfoActivity"
+            android:label="@string/title_recipeinfo_list"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="info.romanelli.udacity.bakingapp.MainActivity" />
+        </activity>
+        <activity
+            android:name=".RecipeInfoStepActivity"
+            android:label="@string/title_recipeinfo_detail"
+            android:parentActivityName=".RecipeInfoActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="info.romanelli.udacity.bakingapp.RecipeInfoActivity" />
+        </activity>
     </application>
 
 </manifest>

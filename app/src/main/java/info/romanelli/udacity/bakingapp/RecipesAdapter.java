@@ -3,11 +3,14 @@ package info.romanelli.udacity.bakingapp;
 import android.content.res.Resources;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -26,6 +29,22 @@ public class RecipesAdapter extends RecyclerView.Adapter<RecipesAdapter.ViewHold
 
     public void setData(final List<RecipeData> listRecipes) {
         this.listRecipes = listRecipes;
+
+//        ////////////////////////////////////////////////
+//        // TODO AOR REMOVE, FOR DEBUGGING PURPOSES ONLY! (See also RecipeData.setImage(String)
+//        for (int i = 0; i < listRecipes.size(); i++) {
+//            if (i == 2) {
+//                listRecipes.get(i).setImage(
+//                        "xxxhttps://imagesvc.timeincapp.com/v3/mm/image?url=https%3A%2F%2Fcdn-image.realsimple.com%2Fsites%2Fdefault%2Ffiles%2Fstyles%2Fportrait_435x518%2Fpublic%2Fimage%2Fimages%2F1210new%2Fred-lentil-curry-ictcrop_300.jpg%3Fitok%3DJ2Owt05b&w=700&q=85"
+//                );
+//            } else if ( (i % 2) == 0) {
+//                listRecipes.get(i).setImage(
+//                        "https://imagesvc.timeincapp.com/v3/mm/image?url=https%3A%2F%2Fcdn-image.realsimple.com%2Fsites%2Fdefault%2Ffiles%2Fstyles%2Fportrait_435x518%2Fpublic%2Fimage%2Fimages%2F1210new%2Fred-lentil-curry-ictcrop_300.jpg%3Fitok%3DJ2Owt05b&w=700&q=85"
+//                );
+//            }
+//        }
+//        ////////////////////////////////////////////////
+
         notifyDataSetChanged();
     }
 
@@ -42,7 +61,7 @@ public class RecipesAdapter extends RecyclerView.Adapter<RecipesAdapter.ViewHold
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
 
         final RecipeData recipe = listRecipes.get(position);
 
@@ -67,10 +86,24 @@ public class RecipesAdapter extends RecyclerView.Adapter<RecipesAdapter.ViewHold
         }
 
         if (recipe.getImage() != null && recipe.getImage().trim().length() >= 1) {
-            // TODO AOR Fetch image from the Internet!
-            // AppUtil.setPosterToView(null, recipe.getImage(), holder.ivRecipePicture);
-            // See PopularMovies2
-            // holder.ivRecipePicture.setImageResource(?);
+            Picasso.get()
+                    .load(recipe.getImageUri())
+                    .placeholder(R.drawable.ic_baseline_fastfood_24px)
+                    .into(
+                        holder.ivRecipePicture,
+                        new com.squareup.picasso.Callback() {
+                            @Override
+                            public void onSuccess() {
+                                Log.d(TAG, "Picasso:onSuccess: image fetched");
+                            }
+                            @Override
+                            public void onError(Exception e) {
+                                Log.e(TAG, "Picasso:onError: ", e);
+                                // TODO AOR Load the 'error' image
+                                holder.ivRecipePicture.setImageResource(R.drawable.ic_baseline_error_outline_24px);
+                            }
+                        }
+                );
         } else {
             holder.ivRecipePicture.setImageResource(R.drawable.ic_baseline_fastfood_24px);
         }

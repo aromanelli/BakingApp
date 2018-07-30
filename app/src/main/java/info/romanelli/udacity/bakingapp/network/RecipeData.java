@@ -1,7 +1,9 @@
 package info.romanelli.udacity.bakingapp.network;
 
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -9,7 +11,8 @@ import java.util.List;
 
 public final class RecipeData implements Parcelable {
 
-    // POJO design coded by me confirmed via http://www.jsonschema2pojo.org/
+    // POJO design coded by me, confirmed via http://www.jsonschema2pojo.org/
+    final static private String TAG = RecipeData.class.getSimpleName();
 
     @SerializedName("id")
     private int mId;
@@ -28,6 +31,8 @@ public final class RecipeData implements Parcelable {
 
     @SerializedName("image")
     private String mImage;
+
+    private Uri mImageUri;
 
     public int getId() {
         return mId;
@@ -53,6 +58,28 @@ public final class RecipeData implements Parcelable {
         return mImage;
     }
 
+//    // TODO AOR REMOVE, FOR DEBUGGING PURPOSES ONLY! (See also RecipesAdapter.setData(List<RecipeData>)
+//    public String setImage(final String image) {
+//        String oldImage = mImage;
+//        mImage = image;
+//        return oldImage;
+//    }
+
+    /**
+     * @return A {@link Uri} to the image, or {@code null} if no valid path to image is available.
+     */
+    public Uri getImageUri() {
+        if ((mImage != null) && (mImage.length() >= 1) && mImageUri == null) {
+            try {
+                mImageUri = Uri.parse(mImage).buildUpon().build();
+                Log.d(TAG, "getImageUri: ["+ mImageUri +"]");
+            } catch (UnsupportedOperationException use) {
+                Log.e(TAG, "getImageUri: ", use);
+            }
+        }
+        return mImageUri;
+    }
+
     @Override
     public String toString() {
         return "\nRecipeData{" +
@@ -60,6 +87,7 @@ public final class RecipeData implements Parcelable {
                 ", mName='" + mName + '\'' +
                 ", mServings=" + mServings +
                 ", mImage='" + mImage + '\'' +
+                ", mImageUri='" + mImageUri + '\'' +
                 ",\n\tmIngredients=" + mIngredients +
                 ",\n\tmSteps=" + mSteps +
                 "}";
@@ -79,6 +107,7 @@ public final class RecipeData implements Parcelable {
 
         mServings = in.readInt();
         mImage = in.readString();
+        mImageUri = in.readParcelable(Uri.class.getClassLoader());
     }
 
     public static final Creator<RecipeData> CREATOR = new Creator<RecipeData>() {
@@ -106,6 +135,7 @@ public final class RecipeData implements Parcelable {
         dest.writeList(mSteps);
         dest.writeInt(mServings);
         dest.writeString(mImage);
+        dest.writeParcelable(mImageUri, 0);
     }
 
 }

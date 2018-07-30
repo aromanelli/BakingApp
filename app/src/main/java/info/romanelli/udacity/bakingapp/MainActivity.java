@@ -23,14 +23,16 @@ public class MainActivity
     final static private String TAG = MainActivity.class.getSimpleName();
 
     final static public String KEY_BUNDLE_RECIPES = "key_bundle_recipese";
+    final static public String KEY_BUNDLE_RV_ITEM_POS = "key_bundle_recyclerview_item_position";
     final static public String KEY_RECIPE_DATA = "key_recipe_data";
 
     private RecyclerView mViewRecipes;
 
     private RecipesAdapter mAdapterRecipes;
 
-    // Bundle.putParcelableArrayList requires ArrayList not List
-    private List<RecipeData> listRecipes;
+    private List<RecipeData> mListRecipes;
+    
+    private int mIndexFirstVisibleItem = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,8 +68,9 @@ public class MainActivity
                         .show();
             }
         } else {
-            listRecipes = savedInstanceState.getParcelableArrayList(KEY_BUNDLE_RECIPES);
-            fetchedRecipes(listRecipes);
+            mListRecipes = savedInstanceState.getParcelableArrayList(KEY_BUNDLE_RECIPES);
+            mIndexFirstVisibleItem = savedInstanceState.getInt(KEY_BUNDLE_RV_ITEM_POS);
+            fetchedRecipes(mListRecipes);
         }
 
     }
@@ -75,15 +78,23 @@ public class MainActivity
     @Override
     public void fetchedRecipes(List<RecipeData> recipes) {
         Log.d(TAG, "fetchedRecipes() called with: recipes = [" + recipes + "]");
-        this.listRecipes = recipes;
-        mViewRecipes.getLayoutManager().scrollToPosition(0);
+        this.mListRecipes = recipes;
+        mViewRecipes.getLayoutManager().scrollToPosition(mIndexFirstVisibleItem);
         mAdapterRecipes.setData(recipes);
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putParcelableArrayList(
-                KEY_BUNDLE_RECIPES, (ArrayList<RecipeData>) listRecipes);
+                KEY_BUNDLE_RECIPES,
+                // Bundle.putParcelableArrayList requires ArrayList, not List
+                (ArrayList<RecipeData>) mListRecipes
+        );
+        outState.putInt(
+                KEY_BUNDLE_RV_ITEM_POS,
+                ((GridLayoutManager) mViewRecipes.getLayoutManager())
+                        .findFirstCompletelyVisibleItemPosition()
+        );
         super.onSaveInstanceState(outState);
     }
 
@@ -92,6 +103,7 @@ public class MainActivity
         Log.d(TAG, "onRecipeClick() called with: recipe = [" + recipe + "], ivPoster = [" + ivPoster + "]");
         final Bundle bundle = new Bundle(1);
         bundle.putParcelable(KEY_RECIPE_DATA, recipe);
+
         // TODO AOR Activate below code
 //        final Intent intent = new Intent(MainActivity.this, RecipeDetailActivity.class);
 //        intent.putExtras(bundle);

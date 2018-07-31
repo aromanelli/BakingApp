@@ -3,7 +3,6 @@ package info.romanelli.udacity.bakingapp;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -49,11 +48,8 @@ public class RecipeInfoStepFragment extends Fragment {
 
             Activity activity = this.getActivity();
             if (activity != null) {
-                CollapsingToolbarLayout appBarLayout = activity.findViewById(R.id.toolbar_layout);
-                if (appBarLayout != null) {
-                    appBarLayout.setTitle(mItem.content);
-                }
-            } // TODO AOR Does this need an 'else' ?
+                activity.setTitle(mItem.content);
+            }
         }
     }
 

@@ -11,6 +11,6 @@
     <string name="msg_cant_offline">شما باید آنلاین باشید تا بتوانید از این برنامه استفاده کنید!</string>
     <string name="msg_ok">باشه</string>
     <string name="msg_close">بستن</string>
-    <string name="title_rvRecipeInfo">RecipeInfos</string> <!-- TODO AOR Get Farsi text -->
-    <string name="title_recipeinfo_detail">RecipeInfo Detail</string> <!-- TODO AOR Get Farsi text -->
+    <string name="title_recipeinfo">Recipe Information</string> <!-- TODO AOR Get Farsi text -->
+    <string name="title_recipeinfo_step">Recipe Info Step</string> <!-- TODO AOR Get Farsi text -->
 </resources>

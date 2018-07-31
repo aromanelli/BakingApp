@@ -36,7 +36,8 @@ public class RecipeInfoActivity extends AppCompatActivity {
         setContentView(R.layout.activity_recipeinfo);
 
         mRecipeData = getIntent().getParcelableExtra(MainActivity.KEY_RECIPE_DATA);
-        assert mRecipeData != null;
+        if (mRecipeData == null)
+            throw new IllegalStateException("Expected a "+ RecipeData.class.getSimpleName() +" reference!");
         setTitle(mRecipeData.getName());
 
         Toolbar toolbar = findViewById(R.id.toolbar);

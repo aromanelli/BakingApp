@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import info.romanelli.udacity.bakingapp.data.DummyContent;
+import info.romanelli.udacity.bakingapp.data.RecipeData;
 
 /**
  * An activity representing a list of RecipeInfos. This activity
@@ -27,10 +28,16 @@ public class RecipeInfoActivity extends AppCompatActivity {
      */
     private boolean mTwoPane;
 
+    private RecipeData mRecipeData;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipeinfo);
+
+        mRecipeData = getIntent().getParcelableExtra(MainActivity.KEY_RECIPE_DATA);
+        assert mRecipeData != null;
+        setTitle(mRecipeData.getName());
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);

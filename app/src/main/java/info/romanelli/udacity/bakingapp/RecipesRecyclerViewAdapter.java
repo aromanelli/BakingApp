@@ -16,14 +16,14 @@ import java.util.List;
 
 import info.romanelli.udacity.bakingapp.data.RecipeData;
 
-public class RecipesAdapter extends RecyclerView.Adapter<RecipesAdapter.ViewHolder> {
+public class RecipesRecyclerViewAdapter extends RecyclerView.Adapter<RecipesRecyclerViewAdapter.ViewHolder> {
 
-    final static private String TAG = RecipesAdapter.class.getSimpleName();
+    final static private String TAG = RecipesRecyclerViewAdapter.class.getSimpleName();
 
     private List<RecipeData> listRecipes;
     final private OnClickHandler clickHandler;
 
-    RecipesAdapter(final OnClickHandler clickHandler) {
+    RecipesRecyclerViewAdapter(final OnClickHandler clickHandler) {
         this.clickHandler = clickHandler;
     }
 

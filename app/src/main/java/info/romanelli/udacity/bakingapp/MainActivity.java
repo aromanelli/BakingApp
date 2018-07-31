@@ -20,7 +20,7 @@ import info.romanelli.udacity.bakingapp.network.RecipesFetcher;
 
 public class MainActivity
         extends AppCompatActivity
-        implements RecipesAdapter.OnClickHandler, RecipesFetcher.Listener {
+        implements RecipesRecyclerViewAdapter.OnClickHandler, RecipesFetcher.Listener {
 
     final static private String TAG = MainActivity.class.getSimpleName();
 
@@ -30,7 +30,7 @@ public class MainActivity
 
     private RecyclerView mViewRecipes;
 
-    private RecipesAdapter mAdapterRecipes;
+    private RecipesRecyclerViewAdapter mAdapterRecipes;
 
     private List<RecipeData> mListRecipes;
     
@@ -52,7 +52,7 @@ public class MainActivity
         GridLayoutManager layoutManager = new GridLayoutManager(this, numberOfCardCols);
         mViewRecipes.setLayoutManager(layoutManager);
 
-        mAdapterRecipes = new RecipesAdapter(this);
+        mAdapterRecipes = new RecipesRecyclerViewAdapter(this);
         mViewRecipes.setAdapter(mAdapterRecipes);
 
         // If first-time call, fetched movie info data ...

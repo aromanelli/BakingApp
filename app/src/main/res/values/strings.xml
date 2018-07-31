@@ -10,6 +10,6 @@
     <string name="msg_cant_offline">You must be online, to be able to use this application!</string>
     <string name="msg_ok">OK</string>
     <string name="msg_close">Close</string>
-    <string name="title_recipeinfo_list">RecipeInfos</string>
+    <string name="title_rvRecipeInfo">RecipeInfos</string>
     <string name="title_recipeinfo_detail">RecipeInfo Detail</string>
 </resources>

@@ -22,7 +22,7 @@
         </activity>
         <activity
             android:name=".RecipeInfoActivity"
-            android:label="@string/title_recipeinfo_list"
+            android:label="@string/title_rvRecipeInfo"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data

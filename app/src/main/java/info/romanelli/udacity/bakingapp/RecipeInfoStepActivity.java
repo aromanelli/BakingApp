@@ -20,7 +20,7 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipeinfo_step);
 
-        Toolbar toolbar = findViewById(R.id.detail_toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         // Show the Up button in the action bar.

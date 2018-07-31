@@ -1,4 +1,4 @@
-package info.romanelli.udacity.bakingapp.network;
+package info.romanelli.udacity.bakingapp.data;
 
 import android.net.Uri;
 import android.os.Parcel;

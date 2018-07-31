@@ -10,7 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import info.romanelli.udacity.bakingapp.dummy.DummyContent;
+import info.romanelli.udacity.bakingapp.data.DummyContent;
 
 /**
  * A fragment representing a single RecipeInfo detail screen.

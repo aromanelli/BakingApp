@@ -14,7 +14,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-import info.romanelli.udacity.bakingapp.network.RecipeData;
+import info.romanelli.udacity.bakingapp.data.RecipeData;
 
 public class RecipesAdapter extends RecyclerView.Adapter<RecipesAdapter.ViewHolder> {
 

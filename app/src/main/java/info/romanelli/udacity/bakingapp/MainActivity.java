@@ -14,8 +14,8 @@ import android.widget.ImageView;
 import java.util.ArrayList;
 import java.util.List;
 
+import info.romanelli.udacity.bakingapp.data.RecipeData;
 import info.romanelli.udacity.bakingapp.network.NetUtil;
-import info.romanelli.udacity.bakingapp.network.RecipeData;
 import info.romanelli.udacity.bakingapp.network.RecipesFetcher;
 
 public class MainActivity

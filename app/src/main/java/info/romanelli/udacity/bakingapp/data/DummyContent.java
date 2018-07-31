@@ -1,4 +1,4 @@
-package info.romanelli.udacity.bakingapp.dummy;
+package info.romanelli.udacity.bakingapp.data;
 
 import java.util.ArrayList;
 import java.util.HashMap;

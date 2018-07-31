@@ -19,7 +19,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import info.romanelli.udacity.bakingapp.dummy.DummyContent;
+import info.romanelli.udacity.bakingapp.data.DummyContent;
 
 /**
  * An activity representing a list of RecipeInfos. This activity

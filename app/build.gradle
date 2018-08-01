@@ -21,6 +21,9 @@ android {
 dependencies {
 
     //////////////////////////////////////////////////////////////////////////////////////
+    implementation "android.arch.lifecycle:extensions:1.1.1"
+    implementation "android.arch.lifecycle:viewmodel:1.1.1"
+    //////////////////////////////////////////////////////////////////////////////////////
     implementation 'com.squareup.picasso:picasso:2.71828'
     // Picasso 2.71828 not comp w/ appcompat-v7:27.1.1 unless below
     // two libraries are manually loaded in with right version # ...

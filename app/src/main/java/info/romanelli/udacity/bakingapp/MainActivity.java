@@ -1,6 +1,7 @@
 package info.romanelli.udacity.bakingapp;
 
 import android.app.AlertDialog;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -11,7 +12,6 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.widget.ImageView;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import info.romanelli.udacity.bakingapp.data.RecipeData;
@@ -24,16 +24,15 @@ public class MainActivity
 
     final static private String TAG = MainActivity.class.getSimpleName();
 
-    final static public String KEY_BUNDLE_RECIPES = "key_bundle_recipese";
     final static public String KEY_BUNDLE_RV_ITEM_POS = "key_bundle_recyclerview_item_position";
     final static public String KEY_RECIPE_DATA = "key_recipe_data";
+    final static public String KEY_INGREDIENT_DATA = "key_ingredient_data";
+    final static public String KEY_STEP_DATA = "key_step_data";
 
     private RecyclerView mViewRecipes;
 
     private RecipesRecyclerViewAdapter mAdapterRecipes;
 
-    private List<RecipeData> mListRecipes;
-    
     private int mIndexFirstVisibleItem = 0;
 
     @Override
@@ -56,8 +55,7 @@ public class MainActivity
         mViewRecipes.setAdapter(mAdapterRecipes);
 
         // If first-time call, fetched movie info data ...
-        if (savedInstanceState == null ||
-                (!savedInstanceState.containsKey(KEY_BUNDLE_RECIPES)) ) {
+        if (savedInstanceState == null ) {
             if (NetUtil.isOnline(this)) {
                 RecipesFetcher.fetchRecipes(this, this);
             } else {
@@ -75,9 +73,10 @@ public class MainActivity
                         .show();
             }
         } else {
-            mListRecipes = savedInstanceState.getParcelableArrayList(KEY_BUNDLE_RECIPES);
             mIndexFirstVisibleItem = savedInstanceState.getInt(KEY_BUNDLE_RV_ITEM_POS);
-            fetchedRecipes(mListRecipes);
+            fetchedRecipes(
+                    ViewModelProviders.of(this).get(DataViewModel.class).getListRecipes()
+            );
         }
 
     }
@@ -85,18 +84,13 @@ public class MainActivity
     @Override
     public void fetchedRecipes(List<RecipeData> recipes) {
         Log.d(TAG, "fetchedRecipes() called with: recipes = [" + recipes + "]");
-        this.mListRecipes = recipes;
+        ViewModelProviders.of(this).get(DataViewModel.class).setListRecipes(recipes);
         mViewRecipes.getLayoutManager().scrollToPosition(mIndexFirstVisibleItem);
         mAdapterRecipes.setData(recipes);
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putParcelableArrayList(
-                KEY_BUNDLE_RECIPES,
-                // Bundle.putParcelableArrayList requires ArrayList, not List
-                (ArrayList<RecipeData>) mListRecipes
-        );
         outState.putInt(
                 KEY_BUNDLE_RV_ITEM_POS,
                 ((GridLayoutManager) mViewRecipes.getLayoutManager())
@@ -107,6 +101,7 @@ public class MainActivity
 
     @Override
     public void onRecipeClick(RecipeData recipe, ImageView ivPoster) {
+        ViewModelProviders.of(this).get(DataViewModel.class).setRecipeData(recipe);
         final Bundle bundle = new Bundle(1);
         bundle.putParcelable(KEY_RECIPE_DATA, recipe);
         final Intent intent = new Intent(MainActivity.this, RecipeInfoActivity.class);

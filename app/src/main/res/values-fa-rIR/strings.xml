@@ -18,5 +18,5 @@
     <item quantity="other">%1$d مواد لازم</item>
 </plurals>
 <!-- https://developer.android.com/reference/java/util/Formatter -->
-<string name="step_number_info">%2$s :%1$d مرحله</string>
+<string name="step_number_info">%s :مرحله</string>
 </resources>

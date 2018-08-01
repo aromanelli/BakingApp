@@ -1,5 +1,6 @@
 package info.romanelli.udacity.bakingapp;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
@@ -27,18 +28,20 @@ public class RecipeInfoActivity extends AppCompatActivity {
      */
     private boolean mTwoPane;
 
-    private RecipeData mRecipeData;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipeinfo);
 
-        mRecipeData = getIntent().getParcelableExtra(MainActivity.KEY_RECIPE_DATA);
-        if (mRecipeData == null)
-            throw new IllegalStateException("Expected a "+ RecipeData.class.getSimpleName() +" reference!");
+        if (savedInstanceState == null) {
+            ViewModelProviders.of(this).get(DataViewModel.class).setRecipeData(
+                    (RecipeData) getIntent().getParcelableExtra(MainActivity.KEY_RECIPE_DATA)
+            );
+        }
+        if (ViewModelProviders.of(this).get(DataViewModel.class).getRecipeData() == null)
+            throw new IllegalStateException("Expected a " + RecipeData.class.getSimpleName() + " reference!");
 
-        setTitle(mRecipeData.getName());
+        setTitle(ViewModelProviders.of(this).get(DataViewModel.class).getRecipeData().getName());
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -61,7 +64,7 @@ public class RecipeInfoActivity extends AppCompatActivity {
         View recyclerView = findViewById(R.id.rvRecipeInfo);
         assert recyclerView != null;
         ((RecyclerView) recyclerView).setAdapter(
-                new RecipeInfoRecyclerViewAdapter(this, mRecipeData, mTwoPane)
+                new RecipeInfoRecyclerViewAdapter(this, mTwoPane)
         );
 
     }

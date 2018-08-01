@@ -16,5 +16,5 @@
         <item quantity="one">%1$d Recipe Ingredient</item>
         <item quantity="other">%1$d Recipe Ingredients</item>
     </plurals>
-    <string name="step_number_info">Step %1$d: %2$s</string>
+    <string name="step_number_info">Step: %s</string>
 </resources>

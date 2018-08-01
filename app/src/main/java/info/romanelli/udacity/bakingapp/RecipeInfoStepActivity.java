@@ -1,13 +1,19 @@
 package info.romanelli.udacity.bakingapp;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import info.romanelli.udacity.bakingapp.data.RecipeData;
+import info.romanelli.udacity.bakingapp.data.StepData;
 
 /**
  * An activity representing a single RecipeInfo detail screen. This
@@ -16,8 +22,6 @@ import info.romanelli.udacity.bakingapp.data.RecipeData;
  * in a {@link RecipeInfoActivity}.
  */
 public class RecipeInfoStepActivity extends AppCompatActivity {
-
-    private RecipeData mRecipeData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,9 +37,19 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        mRecipeData = getIntent().getParcelableExtra(MainActivity.KEY_RECIPE_DATA);
-        if (mRecipeData == null)
-            throw new IllegalStateException("Expected a "+ RecipeData.class.getSimpleName() +" reference!");
+        if (savedInstanceState == null) {
+            List<Parcelable> listData = getIntent().getParcelableArrayListExtra(MainActivity.KEY_STEP_DATA);
+            ViewModelProviders.of(this).get(DataViewModel.class).setRecipeData(
+                    (RecipeData) listData.get(0)
+            );
+            ViewModelProviders.of(this).get(DataViewModel.class).setStepData(
+                    (StepData) listData.get(1)
+            );
+        }
+        if (ViewModelProviders.of(this).get(DataViewModel.class).getRecipeData() == null)
+            throw new IllegalStateException("Expected a " + RecipeData.class.getSimpleName() + " reference!");
+        if (ViewModelProviders.of(this).get(DataViewModel.class).getStepData() == null)
+            throw new IllegalStateException("Expected a "+ StepData.class.getSimpleName() +" reference!");
 
         // savedInstanceState is non-null when there is fragment state
         // saved from previous configurations of this activity
@@ -49,14 +63,26 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
         if (savedInstanceState == null) {
             // Create the detail fragment and add it to
             // the activity, using a fragment transaction.
-            Bundle arguments = new Bundle();
-            arguments.putParcelable(MainActivity.KEY_RECIPE_DATA, mRecipeData);
+
+            Bundle bundle = new Bundle();
+            ArrayList<Parcelable> listData = new ArrayList<>(2);
+            // 'mRecipeData' is needed by RecipeInfo(Ingredient/Step)Activity
+            // when calling back to RecipeInfoActivity when user backs out
+            listData.add(0, ViewModelProviders.of(this).get(DataViewModel.class).getRecipeData()); // 0 for documentation reasons
+            listData.add( ViewModelProviders.of(this).get(DataViewModel.class).getStepData() );
+            bundle.putParcelableArrayList(
+                    MainActivity.KEY_STEP_DATA,
+                    listData
+            );
+
+            // https://developer.android.com/topic/libraries/architecture/viewmodel#sharing
             RecipeInfoStepFragment fragment = new RecipeInfoStepFragment();
-            fragment.setArguments(arguments);
+            fragment.setArguments(bundle); // No need when using ViewModelProviders.of
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.recipeinfo_step_container, fragment)
                     .commit();
         }
+
     }
 
     @Override
@@ -69,7 +95,10 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
             // http://developer.android.com/design/patterns/navigation.html#up-vs-back
 
             final Bundle bundle = new Bundle(1);
-            bundle.putParcelable(MainActivity.KEY_RECIPE_DATA, mRecipeData);
+            bundle.putParcelable(
+                    MainActivity.KEY_RECIPE_DATA,
+                    ViewModelProviders.of(this).get(DataViewModel.class).getRecipeData()
+            );
             Intent intent = new Intent(this, RecipeInfoActivity.class);
             intent.putExtras(bundle);
             navigateUpTo(intent);

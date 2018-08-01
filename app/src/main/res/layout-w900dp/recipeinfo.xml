@@ -26,6 +26,7 @@
         android:layout_height="match_parent"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
+        android:paddingTop="8dp"
         app:layoutManager="android.support.v7.widget.LinearLayoutManager"
         tools:context="info.romanelli.udacity.bakingapp.RecipeInfoActivity"
         tools:listitem="@layout/recipeinfo_content" />

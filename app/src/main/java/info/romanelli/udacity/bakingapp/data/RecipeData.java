@@ -8,8 +8,9 @@ import android.util.Log;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
+import java.util.Objects;
 
-public final class RecipeData implements Parcelable {
+final public class RecipeData implements Parcelable {
 
     // POJO design coded by me, confirmed via http://www.jsonschema2pojo.org/
     final static private String TAG = RecipeData.class.getSimpleName();
@@ -91,6 +92,21 @@ public final class RecipeData implements Parcelable {
                 ",\n\tmIngredients=" + mIngredients +
                 ",\n\tmSteps=" + mSteps +
                 "}";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RecipeData that = (RecipeData) o;
+        return mId == that.mId &&
+                Objects.equals(mName, that.mName);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(mId, mName);
     }
 
     ////////////////////////////////////////////////////////////////////////////////

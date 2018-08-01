@@ -5,7 +5,9 @@ import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
-final class StepsData implements Parcelable {
+import java.util.Objects;
+
+final public class StepsData implements Parcelable {
 
     @SerializedName("id")
     private int mId;
@@ -22,6 +24,26 @@ final class StepsData implements Parcelable {
     @SerializedName("thumbnailURL")
     private String mURLThumbnail;
 
+    public int getId() {
+        return mId;
+    }
+
+    public String getShortDescription() {
+        return mShortDescription;
+    }
+
+    public String getDescription() {
+        return mDescription;
+    }
+
+    public String getURLVideo() {
+        return mURLVideo;
+    }
+
+    public String getURLThumbnail() {
+        return mURLThumbnail;
+    }
+
     @Override
     public String toString() {
         return "StepsData{" +
@@ -31,6 +53,20 @@ final class StepsData implements Parcelable {
                 ", mURLVideo='" + mURLVideo + '\'' +
                 ", mURLThumbnail='" + mURLThumbnail + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        StepsData stepsData = (StepsData) o;
+        return mId == stepsData.mId;
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(mId);
     }
 
     ////////////////////////////////////////////////////////////////////////////////

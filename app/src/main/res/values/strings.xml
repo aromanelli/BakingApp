@@ -4,12 +4,17 @@
     <string name="msg_offline">Offline</string>
     <string name="recipe_picture_desc">A picture of the recipe</string>
     <plurals name="number_of_servings">
-        <item quantity="one">%d serving</item>
-        <item quantity="other">%d servings</item>
+        <item quantity="one">%1$d serving</item>
+        <item quantity="other">%1$d servings</item>
     </plurals>
     <string name="msg_cant_offline">You must be online, to be able to use this application!</string>
     <string name="msg_ok">OK</string>
     <string name="msg_close">Close</string>
     <string name="title_recipeinfo">Recipe Information</string>
     <string name="title_recipeinfo_step">Recipe Info Step</string>
+    <plurals name="recipe_ingredients">
+        <item quantity="one">%1$d Recipe Ingredient</item>
+        <item quantity="other">%1$d Recipe Ingredients</item>
+    </plurals>
+    <string name="step_number_info">Step %1$d: %2$s</string>
 </resources>

@@ -9,7 +9,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 
-import info.romanelli.udacity.bakingapp.data.DummyContent;
 import info.romanelli.udacity.bakingapp.data.RecipeData;
 
 /**
@@ -38,6 +37,7 @@ public class RecipeInfoActivity extends AppCompatActivity {
         mRecipeData = getIntent().getParcelableExtra(MainActivity.KEY_RECIPE_DATA);
         if (mRecipeData == null)
             throw new IllegalStateException("Expected a "+ RecipeData.class.getSimpleName() +" reference!");
+
         setTitle(mRecipeData.getName());
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -61,7 +61,7 @@ public class RecipeInfoActivity extends AppCompatActivity {
         View recyclerView = findViewById(R.id.rvRecipeInfo);
         assert recyclerView != null;
         ((RecyclerView) recyclerView).setAdapter(
-                new RecipeInfoRecyclerViewAdapter(this, DummyContent.ITEMS, mTwoPane)
+                new RecipeInfoRecyclerViewAdapter(this, mRecipeData, mTwoPane)
         );
 
     }

@@ -107,10 +107,8 @@ public class MainActivity
 
     @Override
     public void onRecipeClick(RecipeData recipe, ImageView ivPoster) {
-        Log.d(TAG, "onRecipeClick() called with: recipe = [" + recipe + "], ivPoster = [" + ivPoster + "]");
         final Bundle bundle = new Bundle(1);
         bundle.putParcelable(KEY_RECIPE_DATA, recipe);
-
         final Intent intent = new Intent(MainActivity.this, RecipeInfoActivity.class);
         intent.putExtras(bundle);
         startActivity(intent);

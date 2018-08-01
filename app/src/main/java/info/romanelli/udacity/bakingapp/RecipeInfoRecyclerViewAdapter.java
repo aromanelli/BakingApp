@@ -2,6 +2,7 @@ package info.romanelli.udacity.bakingapp;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -10,42 +11,44 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.List;
-
-import info.romanelli.udacity.bakingapp.data.DummyContent;
+import info.romanelli.udacity.bakingapp.data.RecipeData;
 
 public class RecipeInfoRecyclerViewAdapter extends RecyclerView.Adapter<RecipeInfoRecyclerViewAdapter.ViewHolder> {
 
 
     private final RecipeInfoActivity mParentActivity;
-    private final List<DummyContent.DummyItem> mValues;
+    private final RecipeData mRecipeData;
     private final boolean mTwoPane;
+
     private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            DummyContent.DummyItem item = (DummyContent.DummyItem) view.getTag();
+            RecipeData recipe = (RecipeData) view.getTag();
+            // TODO AOR Code Ingredients or Steps logic
             if (mTwoPane) {
                 Bundle arguments = new Bundle();
-                arguments.putString(RecipeInfoStepFragment.ARG_ITEM_ID, item.id);
+                arguments.putParcelable(MainActivity.KEY_RECIPE_DATA, recipe);
                 RecipeInfoStepFragment fragment = new RecipeInfoStepFragment();
                 fragment.setArguments(arguments);
-                mParentActivity.getSupportFragmentManager().beginTransaction()
+                mParentActivity.getSupportFragmentManager()
+                        .beginTransaction()
                         .replace(R.id.recipeinfo_step_container, fragment)
                         .commit();
             } else {
+                final Bundle bundle = new Bundle(1);
+                bundle.putParcelable(MainActivity.KEY_RECIPE_DATA, recipe);
                 Context context = view.getContext();
                 Intent intent = new Intent(context, RecipeInfoStepActivity.class);
-                intent.putExtra(RecipeInfoStepFragment.ARG_ITEM_ID, item.id);
-
+                intent.putExtras(bundle);
                 context.startActivity(intent);
             }
         }
     };
 
     RecipeInfoRecyclerViewAdapter(RecipeInfoActivity parent,
-                                  List<DummyContent.DummyItem> items,
+                                  RecipeData recipeData,
                                   boolean twoPane) {
-        mValues = items;
+        mRecipeData = recipeData;
         mParentActivity = parent;
         mTwoPane = twoPane;
     }
@@ -60,26 +63,40 @@ public class RecipeInfoRecyclerViewAdapter extends RecyclerView.Adapter<RecipeIn
 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
-        holder.mIdView.setText(mValues.get(position).id);
-        holder.mContentView.setText(mValues.get(position).content);
 
-        holder.itemView.setTag(mValues.get(position));
+        String text;
+        Resources res = holder.tvContent.getResources();
+        if (position == 0) {
+            text = res.getQuantityString(
+                    R.plurals.recipe_ingredients,
+                    // When using the getQuantityString() method, you need to pass the count
+                    // twice if your string includes string formatting with a number!
+                    mRecipeData.getIngredients().size(), mRecipeData.getIngredients().size()
+            );
+        } else {
+            text = res.getString(
+                    R.string.step_number_info,
+                    position, mRecipeData.getSteps().get((position - 1)).getShortDescription()
+            );
+        }
+        holder.tvContent.setText(text);
+
+        holder.itemView.setTag(mRecipeData);
         holder.itemView.setOnClickListener(mOnClickListener);
     }
 
     @Override
     public int getItemCount() {
-        return mValues.size();
+        return 1 + mRecipeData.getSteps().size(); // 1 is for all Ingredients
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
-        final TextView mIdView;
-        final TextView mContentView;
+        
+        final TextView tvContent;
 
         ViewHolder(View view) {
             super(view);
-            mIdView = view.findViewById(R.id.id_text);
-            mContentView = view.findViewById(R.id.content);
+            tvContent = view.findViewById(R.id.content);
         }
     }
 

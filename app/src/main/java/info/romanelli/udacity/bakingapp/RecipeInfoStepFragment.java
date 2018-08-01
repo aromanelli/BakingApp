@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import info.romanelli.udacity.bakingapp.data.DummyContent;
+import info.romanelli.udacity.bakingapp.data.RecipeData;
 
 /**
  * A fragment representing a single RecipeInfo detail screen.
@@ -18,16 +18,11 @@ import info.romanelli.udacity.bakingapp.data.DummyContent;
  * on handsets.
  */
 public class RecipeInfoStepFragment extends Fragment {
-    /**
-     * The fragment argument representing the item ID that this fragment
-     * represents.
-     */
-    public static final String ARG_ITEM_ID = "item_id";
 
     /**
-     * The dummy content this fragment is presenting.
+     * The recipe content this fragment is presenting.
      */
-    private DummyContent.DummyItem mItem;
+    private RecipeData mRecipeData;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -40,15 +35,18 @@ public class RecipeInfoStepFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if ((getArguments() != null) && getArguments().containsKey(ARG_ITEM_ID)) {
-            // Load the dummy content specified by the fragment
+        if ((getArguments() != null) && getArguments().containsKey(MainActivity.KEY_RECIPE_DATA)) {
+
+            // Load the content specified by the fragment
             // arguments. In a real-world scenario, use a Loader
             // to load content from a content provider.
-            mItem = DummyContent.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
+            mRecipeData = getArguments().getParcelable(MainActivity.KEY_RECIPE_DATA);
+            if (mRecipeData == null)
+                throw new IllegalStateException("Expected a "+ RecipeData.class.getSimpleName() +" reference!");
 
             Activity activity = this.getActivity();
             if (activity != null) {
-                activity.setTitle(mItem.content);
+                activity.setTitle(mRecipeData.getName());
             }
         }
     }
@@ -59,8 +57,10 @@ public class RecipeInfoStepFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.recipeinfo_step_content, container, false);
 
         // Show the dummy content as text in a TextView.
-        if (mItem != null) {
-            ((TextView) rootView.findViewById(R.id.recipeinfo_step_content)).setText(mItem.details);
+        if (mRecipeData != null) {
+            ((TextView) rootView.findViewById(R.id.recipeinfo_step_content)).setText(
+                    mRecipeData.getSteps().get(0).getDescription() // TODO AOR CODE THIS 0
+            );
         }
 
         return rootView;

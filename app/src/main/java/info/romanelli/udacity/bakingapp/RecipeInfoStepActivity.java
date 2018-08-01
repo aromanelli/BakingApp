@@ -7,6 +7,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
+import info.romanelli.udacity.bakingapp.data.RecipeData;
+
 /**
  * An activity representing a single RecipeInfo detail screen. This
  * activity is only used on narrow width devices. On tablet-size devices,
@@ -14,6 +16,8 @@ import android.view.MenuItem;
  * in a {@link RecipeInfoActivity}.
  */
 public class RecipeInfoStepActivity extends AppCompatActivity {
+
+    private RecipeData mRecipeData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +33,10 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
+        mRecipeData = getIntent().getParcelableExtra(MainActivity.KEY_RECIPE_DATA);
+        if (mRecipeData == null)
+            throw new IllegalStateException("Expected a "+ RecipeData.class.getSimpleName() +" reference!");
+
         // savedInstanceState is non-null when there is fragment state
         // saved from previous configurations of this activity
         // (e.g. when rotating the screen from portrait to landscape).
@@ -39,11 +47,10 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
         // http://developer.android.com/guide/components/fragments.html
         //
         if (savedInstanceState == null) {
-            // Create the detail fragment and add it to the activity
-            // using a fragment transaction.
+            // Create the detail fragment and add it to
+            // the activity, using a fragment transaction.
             Bundle arguments = new Bundle();
-            arguments.putString(RecipeInfoStepFragment.ARG_ITEM_ID,
-                    getIntent().getStringExtra(RecipeInfoStepFragment.ARG_ITEM_ID));
+            arguments.putParcelable(MainActivity.KEY_RECIPE_DATA, mRecipeData);
             RecipeInfoStepFragment fragment = new RecipeInfoStepFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
@@ -56,13 +63,17 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == android.R.id.home) {
-            // This ID represents the Home or Up button. In the case of this
-            // activity, the Up button is shown. For
+            // android.R.id.home represents the Home or Up button. In
+            // the case of this activity, the Up button is shown. For
             // more details, see the Navigation pattern on Android Design:
-            //
             // http://developer.android.com/design/patterns/navigation.html#up-vs-back
-            //
-            navigateUpTo(new Intent(this, RecipeInfoActivity.class));
+
+            final Bundle bundle = new Bundle(1);
+            bundle.putParcelable(MainActivity.KEY_RECIPE_DATA, mRecipeData);
+            Intent intent = new Intent(this, RecipeInfoActivity.class);
+            intent.putExtras(bundle);
+            navigateUpTo(intent);
+
             return true;
         }
         return super.onOptionsItemSelected(item);

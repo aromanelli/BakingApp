@@ -7,7 +7,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.Objects;
 
-final public class StepsData implements Parcelable {
+final public class StepData implements Parcelable {
 
     @SerializedName("id")
     private int mId;
@@ -46,7 +46,7 @@ final public class StepsData implements Parcelable {
 
     @Override
     public String toString() {
-        return "StepsData{" +
+        return "StepData{" +
                 "mId=" + mId +
                 ", mShortDescription='" + mShortDescription + '\'' +
                 ", mDescription='" + mDescription + '\'' +
@@ -59,8 +59,8 @@ final public class StepsData implements Parcelable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        StepsData stepsData = (StepsData) o;
-        return mId == stepsData.mId;
+        StepData stepData = (StepData) o;
+        return mId == stepData.mId;
     }
 
     @Override
@@ -72,7 +72,7 @@ final public class StepsData implements Parcelable {
     ////////////////////////////////////////////////////////////////////////////////
 
     @SuppressWarnings("WeakerAccess")
-    protected StepsData(Parcel in) {
+    protected StepData(Parcel in) {
         mId = in.readInt();
         mShortDescription = in.readString();
         mDescription = in.readString();
@@ -80,15 +80,15 @@ final public class StepsData implements Parcelable {
         mURLThumbnail = in.readString();
     }
 
-    public static final Creator<StepsData> CREATOR = new Creator<StepsData>() {
+    public static final Creator<StepData> CREATOR = new Creator<StepData>() {
         @Override
-        public StepsData createFromParcel(Parcel in) {
-            return new StepsData(in);
+        public StepData createFromParcel(Parcel in) {
+            return new StepData(in);
         }
 
         @Override
-        public StepsData[] newArray(int size) {
-            return new StepsData[size];
+        public StepData[] newArray(int size) {
+            return new StepData[size];
         }
     };
 

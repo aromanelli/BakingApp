@@ -7,7 +7,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.Objects;
 
-final public class IngredientsData implements Parcelable {
+final public class IngredientData implements Parcelable {
 
     @SerializedName("quantity")
     private float mQuantity;
@@ -20,7 +20,7 @@ final public class IngredientsData implements Parcelable {
 
     @Override
     public String toString() {
-        return "IngredientsData{" +
+        return "IngredientData{" +
                 "mQuantity=" + mQuantity +
                 ", mMeasure='" + mMeasure + '\'' +
                 ", mIngredient='" + mIngredient + '\'' +
@@ -43,7 +43,7 @@ final public class IngredientsData implements Parcelable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        IngredientsData that = (IngredientsData) o;
+        IngredientData that = (IngredientData) o;
         return Float.compare(that.mQuantity, mQuantity) == 0 &&
                 Objects.equals(mMeasure, that.mMeasure) &&
                 Objects.equals(mIngredient, that.mIngredient);
@@ -58,21 +58,21 @@ final public class IngredientsData implements Parcelable {
     ////////////////////////////////////////////////////////////////////////////////
 
     @SuppressWarnings("WeakerAccess")
-    protected IngredientsData(Parcel in) {
+    protected IngredientData(Parcel in) {
         mQuantity = in.readFloat();
         mMeasure = in.readString();
         mIngredient = in.readString();
     }
 
-    public static final Creator<IngredientsData> CREATOR = new Creator<IngredientsData>() {
+    public static final Creator<IngredientData> CREATOR = new Creator<IngredientData>() {
         @Override
-        public IngredientsData createFromParcel(Parcel in) {
-            return new IngredientsData(in);
+        public IngredientData createFromParcel(Parcel in) {
+            return new IngredientData(in);
         }
 
         @Override
-        public IngredientsData[] newArray(int size) {
-            return new IngredientsData[size];
+        public IngredientData[] newArray(int size) {
+            return new IngredientData[size];
         }
     };
 

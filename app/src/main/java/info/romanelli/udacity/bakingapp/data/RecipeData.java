@@ -22,10 +22,10 @@ final public class RecipeData implements Parcelable {
     private String mName;
 
     @SerializedName("ingredients")
-    private List<IngredientsData> mIngredients;
+    private List<IngredientData> mIngredients;
 
     @SerializedName("steps")
-    private List<StepsData> mSteps;
+    private List<StepData> mSteps;
 
     @SerializedName("servings")
     private int mServings;
@@ -43,11 +43,11 @@ final public class RecipeData implements Parcelable {
         return mName;
     }
 
-    public List<IngredientsData> getIngredients() {
+    public List<IngredientData> getIngredients() {
         return mIngredients;
     }
 
-    public List<StepsData> getSteps() {
+    public List<StepData> getSteps() {
         return mSteps;
     }
 
@@ -117,9 +117,9 @@ final public class RecipeData implements Parcelable {
         mName = in.readString();
 
         //noinspection unchecked
-        mIngredients = in.readArrayList(IngredientsData.class.getClassLoader());
+        mIngredients = in.readArrayList(IngredientData.class.getClassLoader());
         //noinspection unchecked
-        mSteps = in.readArrayList(StepsData.class.getClassLoader());
+        mSteps = in.readArrayList(StepData.class.getClassLoader());
 
         mServings = in.readInt();
         mImage = in.readString();

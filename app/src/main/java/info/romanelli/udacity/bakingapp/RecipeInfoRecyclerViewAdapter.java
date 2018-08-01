@@ -20,31 +20,6 @@ public class RecipeInfoRecyclerViewAdapter extends RecyclerView.Adapter<RecipeIn
     private final RecipeData mRecipeData;
     private final boolean mTwoPane;
 
-    private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            RecipeData recipe = (RecipeData) view.getTag();
-            // TODO AOR Code Ingredients or Steps logic
-            if (mTwoPane) {
-                Bundle arguments = new Bundle();
-                arguments.putParcelable(MainActivity.KEY_RECIPE_DATA, recipe);
-                RecipeInfoStepFragment fragment = new RecipeInfoStepFragment();
-                fragment.setArguments(arguments);
-                mParentActivity.getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.recipeinfo_step_container, fragment)
-                        .commit();
-            } else {
-                final Bundle bundle = new Bundle(1);
-                bundle.putParcelable(MainActivity.KEY_RECIPE_DATA, recipe);
-                Context context = view.getContext();
-                Intent intent = new Intent(context, RecipeInfoStepActivity.class);
-                intent.putExtras(bundle);
-                context.startActivity(intent);
-            }
-        }
-    };
-
     RecipeInfoRecyclerViewAdapter(RecipeInfoActivity parent,
                                   RecipeData recipeData,
                                   boolean twoPane) {
@@ -82,7 +57,32 @@ public class RecipeInfoRecyclerViewAdapter extends RecyclerView.Adapter<RecipeIn
         holder.tvContent.setText(text);
 
         holder.itemView.setTag(mRecipeData);
-        holder.itemView.setOnClickListener(mOnClickListener);
+        holder.itemView.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        RecipeData recipe = (RecipeData) view.getTag();
+                        // TODO AOR Code Ingredients or Steps logic
+                        if (mTwoPane) {
+                            Bundle arguments = new Bundle();
+                            arguments.putParcelable(MainActivity.KEY_RECIPE_DATA, recipe);
+                            RecipeInfoStepFragment fragment = new RecipeInfoStepFragment();
+                            fragment.setArguments(arguments);
+                            mParentActivity.getSupportFragmentManager()
+                                    .beginTransaction()
+                                    .replace(R.id.recipeinfo_step_container, fragment)
+                                    .commit();
+                        } else {
+                            final Bundle bundle = new Bundle(1);
+                            bundle.putParcelable(MainActivity.KEY_RECIPE_DATA, recipe);
+                            Context context = view.getContext();
+                            Intent intent = new Intent(context, RecipeInfoStepActivity.class);
+                            intent.putExtras(bundle);
+                            context.startActivity(intent);
+                        }
+                    }
+                }
+        );
     }
 
     @Override

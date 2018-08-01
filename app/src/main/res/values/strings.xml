@@ -17,4 +17,5 @@
         <item quantity="other">%1$d Recipe Ingredients</item>
     </plurals>
     <string name="step_number_info">Step: %s</string>
+    <string name="msg_err_fetching_recipes">An error has occurred while retrieving the recipes.</string>
 </resources>

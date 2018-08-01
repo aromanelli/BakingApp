@@ -12,6 +12,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.widget.ImageView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import info.romanelli.udacity.bakingapp.data.RecipeData;
@@ -33,7 +34,7 @@ public class MainActivity
 
     private RecipesRecyclerViewAdapter mAdapterRecipes;
 
-    private int mIndexFirstVisibleItem = 0;
+    private int mIndexFirstVisibleItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,9 +85,18 @@ public class MainActivity
     @Override
     public void fetchedRecipes(List<RecipeData> recipes) {
         Log.d(TAG, "fetchedRecipes() called with: recipes = [" + recipes + "]");
+        if (recipes == null) {
+            AppUtil.showToast(this, getString(R.string.msg_err_fetching_recipes), false);
+            mIndexFirstVisibleItem = 0;
+        }
+        // A fetching error could end up causing a null
+        // to be passed in, and we don't want nulls.
+        if (recipes == null) {
+            recipes = new ArrayList<>(0);
+        }
         ViewModelProviders.of(this).get(DataViewModel.class).setListRecipes(recipes);
-        mViewRecipes.getLayoutManager().scrollToPosition(mIndexFirstVisibleItem);
         mAdapterRecipes.setData(recipes);
+        mViewRecipes.getLayoutManager().scrollToPosition(mIndexFirstVisibleItem);
     }
 
     @Override

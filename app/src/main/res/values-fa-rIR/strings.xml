@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-<string name="app_name">زمان پخت</string>
-<string name="msg_retrieving_data">گرفتن اطلاعات</string>
-<string name="msg_offline">آفلاین</string>
-<string name="recipe_picture_desc">یک تصویر از دستور غذا</string>
-<plurals name="number_of_servings">
-    <item quantity="one">%1$d نفر را خدمت می کند</item>
-    <item quantity="other">%1$d نفر را خدمت می کند</item>
-</plurals>
-<string name="msg_cant_offline">شما باید آنلاین باشید تا بتوانید از این برنامه استفاده کنید!</string>
-<string name="msg_ok">باشه</string>
-<string name="msg_close">بستن</string>
-<string name="title_recipeinfo">اطلاعات دستور العمل</string>
-<string name="title_recipeinfo_step">اطلاعات گام</string>
-<plurals name="recipe_ingredients">
-    <item quantity="one">%1$d مواد لازم</item>
-    <item quantity="other">%1$d مواد لازم</item>
-</plurals>
-<!-- https://developer.android.com/reference/java/util/Formatter -->
-<string name="step_number_info">%s :مرحله</string>
+    <string name="app_name">زمان پخت</string>
+    <string name="msg_retrieving_data">گرفتن اطلاعات</string>
+    <string name="msg_offline">آفلاین</string>
+    <string name="recipe_picture_desc">یک تصویر از دستور غذا</string>
+    <plurals name="number_of_servings">
+        <item quantity="one">%1$d نفر را خدمت می کند</item>
+        <item quantity="other">%1$d نفر را خدمت می کند</item>
+    </plurals>
+    <string name="msg_cant_offline">شما باید آنلاین باشید تا بتوانید از این برنامه استفاده کنید!</string>
+    <string name="msg_ok">باشه</string>
+    <string name="msg_close">بستن</string>
+    <string name="title_recipeinfo">اطلاعات دستور العمل</string>
+    <string name="title_recipeinfo_step">اطلاعات گام</string>
+    <plurals name="recipe_ingredients">
+        <item quantity="one">%1$d مواد لازم</item>
+        <item quantity="other">%1$d مواد لازم</item>
+    </plurals>
+    <string name="step_number_info">%s :مرحله</string>
+    <string name="msg_err_fetching_recipes">هنگام بازیابی دستور العمل های مورد نیاز خطایی رخ داده است.</string>
 </resources>

@@ -28,6 +28,9 @@ public class RecipesRecyclerViewAdapter extends RecyclerView.Adapter<RecipesRecy
     }
 
     public void setData(final List<RecipeData> listRecipes) {
+        if (listRecipes == null) {
+            throw new IllegalArgumentException("Expected a non-null recipes reference!");
+        }
         this.listRecipes = listRecipes;
 
 //        ////////////////////////////////////////////////

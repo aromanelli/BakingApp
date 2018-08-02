@@ -78,7 +78,7 @@ public class RecipeInfoStepFragment extends Fragment {
 
         // Show the dummy content as text in a TextView.
         if (mRecipeData != null) {
-            ((TextView) rootView.findViewById(R.id.recipeinfo_step_content)).setText(
+            ((TextView) rootView.findViewById(R.id.recipeinfo_step_description)).setText(
                     mStepData.getDescription() // TODO AOR CODE THIS !
             );
         }

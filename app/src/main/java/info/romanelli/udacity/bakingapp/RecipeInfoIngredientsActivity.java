@@ -12,8 +12,8 @@ import android.view.MenuItem;
 import java.util.ArrayList;
 import java.util.List;
 
+import info.romanelli.udacity.bakingapp.data.IngredientData;
 import info.romanelli.udacity.bakingapp.data.RecipeData;
-import info.romanelli.udacity.bakingapp.data.StepData;
 
 /**
  * An activity representing a single RecipeInfo detail screen. This
@@ -21,12 +21,12 @@ import info.romanelli.udacity.bakingapp.data.StepData;
  * item details are presented side-by-side with a list of items
  * in a {@link RecipeInfoActivity}.
  */
-public class RecipeInfoStepActivity extends AppCompatActivity {
+public class RecipeInfoIngredientsActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_recipeinfo_step);
+        setContentView(R.layout.activity_recipeinfo_ingredients);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -38,18 +38,19 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
         }
 
         if (savedInstanceState == null) {
-            List<? extends Parcelable> listData = getIntent().getParcelableArrayListExtra(MainActivity.KEY_STEP_DATA);
-            ViewModelProviders.of(this).get(DataViewModel.class).setRecipeData(
-                    (RecipeData) listData.get(0)
+            List<? extends Parcelable> listData = getIntent().getParcelableArrayListExtra(MainActivity.KEY_INGREDIENT_DATA);
+            ViewModelProviders.of(this).get(DataViewModel.class)
+                    .setRecipeData((RecipeData) listData.get(0)
             );
-            ViewModelProviders.of(this).get(DataViewModel.class).setStepData(
-                    (StepData) listData.get(1)
-            );
+            //noinspection unchecked
+            ViewModelProviders.of(this).get(DataViewModel.class)
+                    .setIngredientsForRecipeData((List<IngredientData>) listData.subList(1, listData.size())
+                    );
         }
         if (ViewModelProviders.of(this).get(DataViewModel.class).getRecipeData() == null)
             throw new IllegalStateException("Expected a " + RecipeData.class.getSimpleName() + " reference!");
-        if (ViewModelProviders.of(this).get(DataViewModel.class).getStepData() == null)
-            throw new IllegalStateException("Expected a "+ StepData.class.getSimpleName() +" reference!");
+        if (ViewModelProviders.of(this).get(DataViewModel.class).getIngredientsForRecipeData() == null)
+            throw new IllegalStateException("Expected a List<"+ IngredientData.class.getSimpleName() +"> reference!");
 
         // savedInstanceState is non-null when there is fragment state
         // saved from previous configurations of this activity
@@ -69,17 +70,17 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
             // 'mRecipeData' is needed by RecipeInfo(Ingredient/Step)Activity
             // when calling back to RecipeInfoActivity when user backs out
             listData.add(0, ViewModelProviders.of(this).get(DataViewModel.class).getRecipeData()); // 0 for documentation reasons
-            listData.add( ViewModelProviders.of(this).get(DataViewModel.class).getStepData() );
+            listData.addAll( ViewModelProviders.of(this).get(DataViewModel.class).getIngredientsForRecipeData() );
             bundle.putParcelableArrayList(
-                    MainActivity.KEY_STEP_DATA,
+                    MainActivity.KEY_INGREDIENT_DATA,
                     listData
             );
 
             // https://developer.android.com/topic/libraries/architecture/viewmodel#sharing
-            RecipeInfoStepFragment fragment = new RecipeInfoStepFragment();
+            RecipeInfoIngredientsFragment fragment = new RecipeInfoIngredientsFragment();
             fragment.setArguments(bundle); // No need when using ViewModelProviders.of
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.recipeinfo_step_container, fragment)
+                    .add(R.id.recipeinfo_ingredients_container, fragment)
                     .commit();
         }
 

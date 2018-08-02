@@ -3,10 +3,12 @@ package info.romanelli.udacity.bakingapp.data;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -34,6 +36,14 @@ final public class RecipeData implements Parcelable {
     private String mImage;
 
     private Uri mImageUri;
+
+    @VisibleForTesting
+    public RecipeData() {
+        super();
+        // MUST be ArrayList, to match RecipeData(Parcel) assignment, and for testing purposes.
+        mIngredients = new ArrayList<>(); // MUST be ArrayList
+        mSteps = new ArrayList<>();
+    }
 
     public int getId() {
         return mId;

@@ -2,6 +2,7 @@ package info.romanelli.udacity.bakingapp.data;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.VisibleForTesting;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -18,13 +19,9 @@ final public class IngredientData implements Parcelable {
     @SerializedName("ingredient")
     private String mIngredient;
 
-    @Override
-    public String toString() {
-        return "IngredientData{" +
-                "mQuantity=" + mQuantity +
-                ", mMeasure='" + mMeasure + '\'' +
-                ", mIngredient='" + mIngredient + '\'' +
-                '}';
+    @VisibleForTesting
+    public IngredientData() {
+        super();
     }
 
     public float getQuantity() {
@@ -37,6 +34,15 @@ final public class IngredientData implements Parcelable {
 
     public String getIngredient() {
         return mIngredient;
+    }
+
+    @Override
+    public String toString() {
+        return "IngredientData{" +
+                "mQuantity=" + mQuantity +
+                ", mMeasure='" + mMeasure + '\'' +
+                ", mIngredient='" + mIngredient + '\'' +
+                '}';
     }
 
     @Override

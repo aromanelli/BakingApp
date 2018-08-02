@@ -12,11 +12,14 @@
     <string name="msg_ok">باشه</string>
     <string name="msg_close">بستن</string>
     <string name="title_recipeinfo">اطلاعات دستور العمل</string>
-    <string name="title_recipeinfo_step">اطلاعات گام</string>
+    <string name="title_recipeinfo_step">لیست مراحل</string>
+    <string name="title_recipeinfo_ingredients">لیست مواد تشکیل دهنده</string>
     <plurals name="recipe_ingredients">
         <item quantity="one">%1$d مواد لازم</item>
         <item quantity="other">%1$d مواد لازم</item>
     </plurals>
     <string name="step_number_info">%s :مرحله</string>
     <string name="msg_err_fetching_recipes">هنگام بازیابی دستور العمل های مورد نیاز خطایی رخ داده است.</string>
+    <string name="msg_err_occurred">خطایی رخ داده است.</string>
+    <string name="ingredient_detail">%3$s ازx %2$s %1$.1f</string> <!-- TODO AOR از -->
 </resources>

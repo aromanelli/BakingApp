@@ -7,7 +7,10 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +25,7 @@ import info.romanelli.udacity.bakingapp.data.StepData;
 
 public class RecipeInfoRecyclerViewAdapter extends RecyclerView.Adapter<RecipeInfoRecyclerViewAdapter.ViewHolder> {
 
+    final static private String TAG = RecipeInfoRecyclerViewAdapter.class.getSimpleName();
 
     private final RecipeInfoActivity mParentActivity;
     private final RecipeData mRecipeData;
@@ -71,8 +75,8 @@ public class RecipeInfoRecyclerViewAdapter extends RecyclerView.Adapter<RecipeIn
                     @Override
                     public void onClick(View view) {
 
-                        final int idContainerView;
-                        final Class<?> clazzActivity;
+                        final Class<? extends AppCompatActivity> clazzActivity;
+                        final Class<? extends Fragment> clazzFragment;
 
                         final Bundle bundle = new Bundle(2);
                         ArrayList<Parcelable> listData = new ArrayList<>(2);
@@ -89,30 +93,43 @@ public class RecipeInfoRecyclerViewAdapter extends RecyclerView.Adapter<RecipeIn
                                     MainActivity.KEY_STEP_DATA,
                                     listData
                             );
-                            idContainerView = R.id.recipeinfo_step_container;
                             clazzActivity = RecipeInfoStepActivity.class;
+                            clazzFragment = RecipeInfoStepFragment.class;
                         }
                         else { // Assume List<IngredientData>
+                            // Below call to setIngredientsForRecipeData not needed, since setTag(...) above sets the same list!
+                            //noinspection unchecked
                             ViewModelProviders.of(mParentActivity).get(DataViewModel.class)
-                                    .setIngredientData((IngredientData) view.getTag()); // For fragment // TODO AOR List not single object!
+                                    .setIngredientsForRecipeData(((List<IngredientData>) view.getTag())); // For fragment
                             //noinspection unchecked
                             listData.addAll( (List<Parcelable>) view.getTag() );
                             bundle.putParcelableArrayList(
                                     MainActivity.KEY_INGREDIENT_DATA,
                                     listData
                             );
-                            idContainerView = -1; // TODO AOR CODE THIS
-                            clazzActivity = null; // TODO AOR CODE THIS
+                            clazzActivity = RecipeInfoIngredientsActivity.class;
+                            clazzFragment = RecipeInfoIngredientsFragment.class;
                         }
 
                         // Launch activity, or set fragment, based on if two panes or not ...
                         if (mTwoPane) {
                             // https://developer.android.com/topic/libraries/architecture/viewmodel#sharing
-                            RecipeInfoStepFragment fragment = new RecipeInfoStepFragment();
+                            Fragment fragment;
+                            try {
+                                fragment = clazzFragment.newInstance();
+                            } catch (InstantiationException | IllegalAccessException e) {
+                                Log.e(TAG, "Error creating Fragment ["+ clazzFragment +"]: ", e);
+                                AppUtil.showToast(
+                                        mParentActivity,
+                                        mParentActivity.getString(R.string.msg_err_occurred),
+                                        false
+                                );
+                                return;
+                            }
                             fragment.setArguments(bundle); // No need when using ViewModelProviders.of
                             mParentActivity.getSupportFragmentManager()
                                     .beginTransaction()
-                                    .replace(idContainerView, fragment)
+                                    .replace(R.id.recipeinfo_fragment_container, fragment)
                                     .commit();
                         } else {
                             Context context = view.getContext();

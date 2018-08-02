@@ -38,6 +38,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="info.romanelli.udacity.bakingapp.RecipeInfoActivity" />
         </activity>
+        <activity
+            android:name=".RecipeInfoIngredientsActivity"
+            android:label="@string/title_recipeinfo_ingredients"
+            android:parentActivityName=".RecipeInfoActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="info.romanelli.udacity.bakingapp.RecipeInfoActivity" />
+        </activity>
     </application>
 
 </manifest>

@@ -32,7 +32,7 @@
         tools:listitem="@layout/recipeinfo_content" />
 
     <FrameLayout
-        android:id="@+id/recipeinfo_step_container"
+        android:id="@+id/recipeinfo_fragment_container"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="3" />

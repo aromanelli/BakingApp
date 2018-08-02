@@ -10,29 +10,31 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.util.List;
+
+import info.romanelli.udacity.bakingapp.data.IngredientData;
 import info.romanelli.udacity.bakingapp.data.RecipeData;
-import info.romanelli.udacity.bakingapp.data.StepData;
 
 /**
  * A fragment representing a single RecipeInfo detail screen.
  * This fragment is either contained in a
  * {@link RecipeInfoActivity}({@link RecipeInfoRecyclerViewAdapter})
- * in two-pane mode (on tablets), or a {@link RecipeInfoStepActivity}
+ * in two-pane mode (on tablets), or a {@link RecipeInfoIngredientsActivity}
  * on handsets.
  */
-public class RecipeInfoStepFragment extends Fragment {
+public class RecipeInfoIngredientsFragment extends Fragment {
 
     /**
      * The recipe content this fragment is presenting.
      */
     private RecipeData mRecipeData;
-    private StepData mStepData;
+    private List<IngredientData> mListIngredientData;
 
     /**
      * Mandatory empty constructor for the fragment manager to
      * instantiate the fragment (e.g. upon screen orientation changes).
      */
-    public RecipeInfoStepFragment() {
+    public RecipeInfoIngredientsFragment() {
     }
 
     @Override
@@ -46,9 +48,9 @@ public class RecipeInfoStepFragment extends Fragment {
 //                mRecipeData = (RecipeData) listData.get(0);
 //                if (mRecipeData == null)
 //                    throw new IllegalStateException("Expected a " + RecipeData.class.getSimpleName() + " reference!");
-//                mStepData = (StepData) listData.get(1);
-//                if (mStepData == null)
-//                    throw new IllegalStateException("Expected a " + StepData.class.getSimpleName() + " reference!");
+//                mListIngredientData = (IngredientData) listData.get(1);
+//                if (mListIngredientData == null)
+//                    throw new IllegalStateException("Expected a " + IngredientData.class.getSimpleName() + " reference!");
 //            }
 //
 //        }
@@ -60,9 +62,9 @@ public class RecipeInfoStepFragment extends Fragment {
                 if (mRecipeData == null)
                     throw new IllegalStateException("Expected a " + RecipeData.class.getSimpleName() + " reference!");
 
-            mStepData = ViewModelProviders.of(getActivity()).get(DataViewModel.class).getStepData();
-                if (mStepData == null)
-                    throw new IllegalStateException("Expected a " + StepData.class.getSimpleName() + " reference!");
+            mListIngredientData = ViewModelProviders.of(getActivity()).get(DataViewModel.class).getIngredientsForRecipeData();
+                if (mListIngredientData == null)
+                    throw new IllegalStateException("Expected a List<" + IngredientData.class.getSimpleName() + "> reference!");
 
             // Needed for when fragment is in a solo activity
             activity.setTitle(mRecipeData.getName());
@@ -71,15 +73,29 @@ public class RecipeInfoStepFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View rootView = inflater.inflate(R.layout.recipeinfo_step_content, container, false);
+        View rootView = inflater.inflate(
+                R.layout.recipeinfo_ingredients_content, container, false);
 
         // Show the dummy content as text in a TextView.
         if (mRecipeData != null) {
-            ((TextView) rootView.findViewById(R.id.recipeinfo_step_content)).setText(
-                    mStepData.getDescription() // TODO AOR CODE THIS !
+            StringBuilder builder = new StringBuilder();
+            for (IngredientData ingredientData : mListIngredientData) {
+                // TODO Swapping languages while in detail activity then hitting back button causes a IllegalFormatConversionException.
+                String text = getString(
+                        R.string.ingredient_detail,
+                        ingredientData.getQuantity(),
+                        ingredientData.getMeasure(),
+                        ingredientData.getIngredient()
+                );
+                builder.append(text);
+                builder.append('\n');
+            }
+            ((TextView) rootView.findViewById(R.id.recipeinfo_ingredients_content)).setText(
+                    builder.toString()
             );
         }
 

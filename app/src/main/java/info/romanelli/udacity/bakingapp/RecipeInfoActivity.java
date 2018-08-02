@@ -53,7 +53,7 @@ public class RecipeInfoActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        if (findViewById(R.id.recipeinfo_step_container) != null) {
+        if (findViewById(R.id.recipeinfo_fragment_container) != null) {
             // The detail container view will be present only in the
             // large-screen layouts (res/values-w900dp).
             // If this view is present, then the

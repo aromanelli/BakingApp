@@ -16,10 +16,21 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    testOptions {
+        // Needed for DataViewModelTest/AppDatabase not mocked error
+        unitTests.returnDefaultValues = true
+    }
 }
 
 dependencies {
 
+    //////////////////////////////////////////////////////////////////////////////////////
+    annotationProcessor "android.arch.lifecycle:compiler:1.1.1"
+    implementation "android.arch.lifecycle:livedata:1.1.1"
+    implementation "android.arch.persistence.room:runtime:1.1.1"
+    annotationProcessor "android.arch.persistence.room:compiler:1.1.1"
+    //////////////////////////////////////////////////////////////////////////////////////
+    implementation 'com.android.support:support-v13:27.1.1' // Fragment / ViewPager
     //////////////////////////////////////////////////////////////////////////////////////
     implementation 'com.google.android.exoplayer:exoplayer:2.8.2'
     //////////////////////////////////////////////////////////////////////////////////////
@@ -43,10 +54,20 @@ dependencies {
     implementation 'com.android.support.constraint:constraint-layout:1.1.2'
     //////////////////////////////////////////////////////////////////////////////////////
 
+    /*
+    Note: Prior to Support Library revision 24.2.0, there was a single v4 support library.
+    That library was divided into multiple modules to improve efficiency. For backwards
+    compatibility, if you list support-v4 in your Gradle script, your APK will include all
+    of the v4 modules. However, to reduce APK size, we recommend that you just list the
+    specific modules your app needs.
+     */
     implementation 'com.android.support:support-v4:27.1.1'
+
     implementation 'com.android.support:design:27.1.1'
+
     testImplementation 'junit:junit:4.12'
 
+    androidTestImplementation "android.arch.core:core-testing:1.1.1"
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 }

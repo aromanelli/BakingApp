@@ -19,7 +19,6 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-import info.romanelli.udacity.bakingapp.data.IngredientData;
 import info.romanelli.udacity.bakingapp.data.RecipeData;
 import info.romanelli.udacity.bakingapp.data.StepData;
 
@@ -32,11 +31,12 @@ public class RecipeInfoRecyclerViewAdapter extends RecyclerView.Adapter<RecipeIn
     private final boolean mTwoPane;
 
     RecipeInfoRecyclerViewAdapter(RecipeInfoActivity parent,
-                                  boolean twoPane) {
+                                  boolean twoPane,
+                                  RecipeData recipeData ) {
 
         mParentActivity = parent;
         mTwoPane = twoPane;
-        mRecipeData = ViewModelProviders.of(mParentActivity).get(DataViewModel.class).getRecipeData();
+        mRecipeData = recipeData;
     }
 
     @NonNull
@@ -97,10 +97,6 @@ public class RecipeInfoRecyclerViewAdapter extends RecyclerView.Adapter<RecipeIn
                             clazzFragment = RecipeInfoStepFragment.class;
                         }
                         else { // Assume List<IngredientData>
-                            // Below call to setIngredientsForRecipeData not needed, since setTag(...) above sets the same list!
-                            //noinspection unchecked
-                            ViewModelProviders.of(mParentActivity).get(DataViewModel.class)
-                                    .setIngredientsForRecipeData(((List<IngredientData>) view.getTag())); // For fragment
                             //noinspection unchecked
                             listData.addAll( (List<Parcelable>) view.getTag() );
                             bundle.putParcelableArrayList(

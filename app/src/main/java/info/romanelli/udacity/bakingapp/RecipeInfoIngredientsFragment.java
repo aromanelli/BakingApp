@@ -62,7 +62,7 @@ public class RecipeInfoIngredientsFragment extends Fragment {
                 if (mRecipeData == null)
                     throw new IllegalStateException("Expected a " + RecipeData.class.getSimpleName() + " reference!");
 
-            mListIngredientData = ViewModelProviders.of(getActivity()).get(DataViewModel.class).getIngredientsForRecipeData();
+            mListIngredientData = ViewModelProviders.of(getActivity()).get(DataViewModel.class).getRecipeData().getIngredients();
                 if (mListIngredientData == null)
                     throw new IllegalStateException("Expected a List<" + IngredientData.class.getSimpleName() + "> reference!");
 

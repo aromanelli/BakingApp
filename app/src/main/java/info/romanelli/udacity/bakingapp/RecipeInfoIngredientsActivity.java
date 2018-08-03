@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import info.romanelli.udacity.bakingapp.data.IngredientData;
-import info.romanelli.udacity.bakingapp.data.RecipeData;
 
 /**
  * An activity representing a single RecipeInfo detail screen. This
@@ -22,6 +21,8 @@ import info.romanelli.udacity.bakingapp.data.RecipeData;
  * in a {@link RecipeInfoActivity}.
  */
 public class RecipeInfoIngredientsActivity extends AppCompatActivity {
+
+    private List<IngredientData> mIngredients;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,19 +39,16 @@ public class RecipeInfoIngredientsActivity extends AppCompatActivity {
         }
 
         if (savedInstanceState == null) {
-            List<? extends Parcelable> listData = getIntent().getParcelableArrayListExtra(MainActivity.KEY_INGREDIENT_DATA);
-            ViewModelProviders.of(this).get(DataViewModel.class)
-                    .setRecipeData((RecipeData) listData.get(0)
-            );
-            //noinspection unchecked
-            ViewModelProviders.of(this).get(DataViewModel.class)
-                    .setIngredientsForRecipeData((List<IngredientData>) listData.subList(1, listData.size())
-                    );
+            mIngredients = getIntent().getParcelableArrayListExtra(MainActivity.KEY_INGREDIENT_DATA);
+        } else {
+            mIngredients = ViewModelProviders.of(this).get(DataViewModel.class).getRecipeData().getIngredients();
         }
-        if (ViewModelProviders.of(this).get(DataViewModel.class).getRecipeData() == null)
-            throw new IllegalStateException("Expected a " + RecipeData.class.getSimpleName() + " reference!");
-        if (ViewModelProviders.of(this).get(DataViewModel.class).getIngredientsForRecipeData() == null)
-            throw new IllegalStateException("Expected a List<"+ IngredientData.class.getSimpleName() +"> reference!");
+        if (mIngredients == null) {
+            throw new IllegalStateException("Expected a List<" + IngredientData.class.getSimpleName() + "> reference!");
+        }
+
+
+
 
         // savedInstanceState is non-null when there is fragment state
         // saved from previous configurations of this activity
@@ -70,7 +68,7 @@ public class RecipeInfoIngredientsActivity extends AppCompatActivity {
             // 'mRecipeData' is needed by RecipeInfo(Ingredient/Step)Activity
             // when calling back to RecipeInfoActivity when user backs out
             listData.add(0, ViewModelProviders.of(this).get(DataViewModel.class).getRecipeData()); // 0 for documentation reasons
-            listData.addAll( ViewModelProviders.of(this).get(DataViewModel.class).getIngredientsForRecipeData() );
+            listData.addAll( ViewModelProviders.of(this).get(DataViewModel.class).getRecipeData().getIngredients() );
             bundle.putParcelableArrayList(
                     MainActivity.KEY_INGREDIENT_DATA,
                     listData

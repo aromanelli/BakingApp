@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import java.util.ArrayList;
 import java.util.List;
 
+import info.romanelli.udacity.bakingapp.data.AppDatabase;
 import info.romanelli.udacity.bakingapp.data.RecipeData;
 import info.romanelli.udacity.bakingapp.network.NetUtil;
 import info.romanelli.udacity.bakingapp.network.RecipesFetcher;
@@ -57,6 +58,8 @@ public class MainActivity
 
         // If first-time call, fetched movie info data ...
         if (savedInstanceState == null ) {
+            AppDatabase.init(this); // Done only once
+            DataViewModel.resetAppDataDBRecord();
             if (NetUtil.isOnline(this)) {
                 RecipesFetcher.fetchRecipes(this, this);
             } else {
@@ -76,7 +79,7 @@ public class MainActivity
         } else {
             mIndexFirstVisibleItem = savedInstanceState.getInt(KEY_BUNDLE_RV_ITEM_POS);
             fetchedRecipes(
-                    ViewModelProviders.of(this).get(DataViewModel.class).getListRecipes()
+                    ViewModelProviders.of(this).get(DataViewModel.class).getRecipes()
             );
         }
 
@@ -85,16 +88,32 @@ public class MainActivity
     @Override
     public void fetchedRecipes(List<RecipeData> recipes) {
         Log.d(TAG, "fetchedRecipes() called with: recipes = [" + recipes + "]");
+
         if (recipes == null) {
             AppUtil.showToast(this, getString(R.string.msg_err_fetching_recipes), false);
+
             mIndexFirstVisibleItem = 0;
-        }
-        // A fetching error could end up causing a null
-        // to be passed in, and we don't want nulls.
-        if (recipes == null) {
+
+            // A fetching error could end up causing a null
+            // to be passed in, and we don't want nulls.
             recipes = new ArrayList<>(0);
         }
-        ViewModelProviders.of(this).get(DataViewModel.class).setListRecipes(recipes);
+
+        ////////////////////////////////////////////////////////////////
+
+//        // Listen for changes to the app data ...
+//        ViewModelProviders.of(MainActivity.this).get(DataViewModel.class)
+//                .getLiveData().observe(this, new Observer<AppDataEntry>() {
+//            @Override
+//            public void onChanged(@Nullable AppDataEntry appDataEntry) {
+//                Log.d(TAG, "onChanged() called with: appDataEntry = [" + appDataEntry + "]");
+//            }
+//        });
+
+        ViewModelProviders.of(this).get(DataViewModel.class).setRecipes(recipes);
+
+        ////////////////////////////////////////////////////////////////
+
         mAdapterRecipes.setData(recipes);
         mViewRecipes.getLayoutManager().scrollToPosition(mIndexFirstVisibleItem);
     }

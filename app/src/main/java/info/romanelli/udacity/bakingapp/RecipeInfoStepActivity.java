@@ -3,7 +3,6 @@ package info.romanelli.udacity.bakingapp;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -15,10 +14,8 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import info.romanelli.udacity.bakingapp.data.RecipeData;
 import info.romanelli.udacity.bakingapp.data.StepData;
 
 /**
@@ -49,21 +46,17 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        if (savedInstanceState == null) {
-            List<? extends Parcelable> listData = getIntent().getParcelableArrayListExtra(MainActivity.KEY_STEP_DATA);
-            ViewModelProviders.of(this).get(DataViewModel.class).setRecipeData(
-                    (RecipeData) listData.get(0)
-            );
-            ViewModelProviders.of(this).get(DataViewModel.class).setStepData(
-                    (StepData) listData.get(1)
-            );
-        }
-        if (ViewModelProviders.of(this).get(DataViewModel.class).getRecipeData() == null)
-            throw new IllegalStateException("Expected a " + RecipeData.class.getSimpleName() + " reference!");
-        if (ViewModelProviders.of(this).get(DataViewModel.class).getStepData() == null)
-            throw new IllegalStateException("Expected a "+ StepData.class.getSimpleName() +" reference!");
+        // savedInstanceState is non-null when there is fragment state
+        // saved from previous configurations of this activity
+        // (e.g. when rotating the screen from portrait to landscape).
+        // In this case, the fragment will automatically be re-added
+        // to its container so we don't need to manually add it.
+        // For more information, see the Fragments API guide at:
+        //
+        // http://developer.android.com/guide/components/fragments.html
 
         if (savedInstanceState == null) {
+
             // Instantiate a ViewPager and a PagerAdapter ...
             // (https://developer.android.com/training/animation/screen-slide)
             mPager = findViewById(R.id.pager);
@@ -89,7 +82,6 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
                     Log.d(TAG, "onPageSelected() called with: position = [" + position + "]");
                     StepData stepData = ViewModelProviders.of(RecipeInfoStepActivity.this).get(DataViewModel.class)
                             .getRecipeData().getSteps().get(position);
-                    System.out.println(">>>>> " + position + " || " + stepData); // TODO AOR REMOVE
                     ViewModelProviders.of(RecipeInfoStepActivity.this).get(DataViewModel.class)
                             .setStepData(stepData);
                 }
@@ -100,38 +92,6 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
             });
 
         }
-
-//        // savedInstanceState is non-null when there is fragment state
-//        // saved from previous configurations of this activity
-//        // (e.g. when rotating the screen from portrait to landscape).
-//        // In this case, the fragment will automatically be re-added
-//        // to its container so we don't need to manually add it.
-//        // For more information, see the Fragments API guide at:
-//        //
-//        // http://developer.android.com/guide/components/fragments.html
-//        //
-//        if (savedInstanceState == null) {
-//            // Create the detail fragment and add it to
-//            // the activity, using a fragment transaction.
-//
-//            Bundle bundle = new Bundle();
-//            ArrayList<Parcelable> listData = new ArrayList<>(2);
-//            // 'mRecipeData' is needed by RecipeInfo(Ingredient/Step)Activity
-//            // when calling back to RecipeInfoActivity when user backs out
-//            listData.add(0, ViewModelProviders.of(this).get(DataViewModel.class).getRecipeData()); // 0 for documentation reasons
-//            listData.add( ViewModelProviders.of(this).get(DataViewModel.class).getStepData() );
-//            bundle.putParcelableArrayList(
-//                    MainActivity.KEY_STEP_DATA,
-//                    listData
-//            );
-//
-//            // https://developer.android.com/topic/libraries/architecture/viewmodel#sharing
-//            RecipeInfoStepFragment fragment = new RecipeInfoStepFragment();
-//            fragment.setArguments(bundle); // No need when using ViewModelProviders.of
-//            getSupportFragmentManager().beginTransaction()
-//                    .add(R.id.recipeinfo_step_container, fragment)
-//                    .commit();
-//        }
 
     }
 
@@ -144,15 +104,7 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
             // more details, see the Navigation pattern on Android Design:
             // http://developer.android.com/design/patterns/navigation.html#up-vs-back
 
-            final Bundle bundle = new Bundle(1);
-            bundle.putParcelable(
-                    MainActivity.KEY_RECIPE_DATA,
-                    ViewModelProviders.of(this).get(DataViewModel.class).getRecipeData()
-            );
-            Intent intent = new Intent(this, RecipeInfoActivity.class);
-            intent.putExtras(bundle);
-            navigateUpTo(intent);
-
+            navigateUpTo( new Intent(this, RecipeInfoActivity.class) );
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -160,6 +112,7 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        // TODO AOR On Nexus 10 view a step vertically, rotate to horizontal, then press below back button, causes mPager to be null.
         if (mPager.getCurrentItem() == 0) {
             // If the user is currently looking at the first step, allow the system to handle the
             // Back button. This calls finish() on this activity and pops the back stack.
@@ -176,7 +129,7 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
 
         private RecipeInfoStepActivity parentActivity;
 
-        public RecipeInfoStepPagerAdapter(FragmentManager fm, RecipeInfoStepActivity parentActivity) {
+        RecipeInfoStepPagerAdapter(FragmentManager fm, RecipeInfoStepActivity parentActivity) {
             super(fm);
             this.parentActivity = parentActivity;
         }
@@ -185,9 +138,9 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
         public Fragment getItem(int position) {
 
             /*
-            The FragmentPagerAdapter instantiates 2 Fragments on start, for index 0 and for index 1.
-            If you want to get data from the Fragment which is on the screen, you can use
-            addOnPageChangeListener for the Pager to get current position.
+            The FragmentPagerAdapter instantiates 2 Fragments on start, for index 0 and
+            for index 1.  If you want to get data from the Fragment which is on the screen,
+            you can use addOnPageChangeListener for the Pager to get current position.
              */
 
             // In this case, instead of just calling getStepData(), we use 'position' on getSteps() list ...
@@ -195,27 +148,12 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
                     .getRecipeData().getSteps().get(position);
             Log.d(TAG, "getItem: position: " + position + ", stepData: " + stepData);
 
-            // TODO AOR Below may not work right because of timing of updates vs reads in fragment
-//            ViewModelProviders.of(parentActivity).get(DataViewModel.class)
-//                    .setStepData(stepData); // Fragment
-
             Bundle bundle = new Bundle();
-            ArrayList<Parcelable> listData = new ArrayList<>(2);
-            // 'mRecipeData' is needed by RecipeInfo(Ingredient/Step)Activity
-            // when calling back to RecipeInfoActivity when user backs out
-            listData.add(0, ViewModelProviders.of(parentActivity).get(DataViewModel.class)
-                    .getRecipeData()); // 0 for documentation reasons
-
-            listData.add(stepData);
-
-            bundle.putParcelableArrayList(
-                    MainActivity.KEY_STEP_DATA,
-                    listData
-            );
+            bundle.putParcelable(MainActivity.KEY_STEP_DATA, stepData);
 
             // https://developer.android.com/topic/libraries/architecture/viewmodel#sharing
             RecipeInfoStepFragment fragment = new RecipeInfoStepFragment();
-            fragment.setArguments(bundle); // No need when using ViewModelProviders.of
+            fragment.setArguments(bundle);
 
             return fragment;
         }
@@ -225,6 +163,7 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
             return ViewModelProviders.of(parentActivity).get(DataViewModel.class)
                     .getRecipeData().getSteps().size();
         }
+
     }
 
 }

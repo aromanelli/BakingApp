@@ -1,15 +1,14 @@
 package info.romanelli.udacity.bakingapp;
 
+import android.app.Activity;
+import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
-import java.util.List;
 
 import info.romanelli.udacity.bakingapp.data.RecipeData;
 import info.romanelli.udacity.bakingapp.data.StepData;
@@ -23,10 +22,6 @@ import info.romanelli.udacity.bakingapp.data.StepData;
  */
 public class RecipeInfoStepFragment extends Fragment {
 
-    /**
-     * The recipe content this fragment is presenting.
-     */
-    private RecipeData mRecipeData;
     private StepData mStepData;
 
     /**
@@ -53,22 +48,16 @@ public class RecipeInfoStepFragment extends Fragment {
             and not multiple RecipeInfoStepFragments, all sharing the same one StepData.
              */
 
-            List<Parcelable> listData = getArguments().getParcelableArrayList(MainActivity.KEY_STEP_DATA);
-            if (listData != null) {
-                mRecipeData = (RecipeData) listData.get(0);
-                if (mRecipeData == null)
-                    throw new IllegalStateException("Expected a " + RecipeData.class.getSimpleName() + " reference!");
-                mStepData = (StepData) listData.get(1);
-                if (mStepData == null)
-                    throw new IllegalStateException("Expected a " + StepData.class.getSimpleName() + " reference!");
-            }
+            mStepData = getArguments().getParcelable(MainActivity.KEY_STEP_DATA);
+            if (mStepData == null)
+                throw new IllegalStateException("Expected a " + StepData.class.getSimpleName() + " reference!");
 
         }
 
-        if (getActivity() != null) {
-
+        Activity activity = this.getActivity();
+        if (activity != null) {
             // Needed for when fragment is in a solo activity
-            getActivity().setTitle(mRecipeData.getName());
+            activity.setTitle(ViewModelProviders.of(getActivity()).get(DataViewModel.class).getRecipeData().getName());
         }
 
     }

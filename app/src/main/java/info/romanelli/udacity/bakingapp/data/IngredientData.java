@@ -19,11 +19,6 @@ final public class IngredientData implements Parcelable {
     @SerializedName("ingredient")
     private String mIngredient;
 
-    @VisibleForTesting
-    public IngredientData() {
-        super();
-    }
-
     public float getQuantity() {
         return mQuantity;
     }
@@ -57,17 +52,36 @@ final public class IngredientData implements Parcelable {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(mQuantity, mMeasure, mIngredient);
     }
 
-    ////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Values assigned, for testing purposes only
+     * (based on equals() testing parameters) ...<br><br>
+     *
+     * ingredientData.mIngredient = "TEST";<br>
+     * ingredientData.mQuantity = 123;<br>
+     * ingredientData.mMeasure = "FPS";<br>
+     * @return IngredientData
+     */
+    @VisibleForTesting
+    static public IngredientData getTestData() {
+        IngredientData ingredientData = new IngredientData(null);
+        ingredientData.mIngredient = "TEST";
+        ingredientData.mQuantity = 123;
+        ingredientData.mMeasure = "FPS";
+        return ingredientData;
+    }
 
     @SuppressWarnings("WeakerAccess")
     protected IngredientData(Parcel in) {
-        mQuantity = in.readFloat();
-        mMeasure = in.readString();
-        mIngredient = in.readString();
+        if (in != null) {
+            mQuantity = in.readFloat();
+            mMeasure = in.readString();
+            mIngredient = in.readString();
+        }
     }
 
     public static final Creator<IngredientData> CREATOR = new Creator<IngredientData>() {

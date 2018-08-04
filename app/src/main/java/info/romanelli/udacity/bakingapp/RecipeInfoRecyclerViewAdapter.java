@@ -16,9 +16,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import info.romanelli.udacity.bakingapp.data.RecipeData;
 import info.romanelli.udacity.bakingapp.data.StepData;
 
@@ -78,31 +75,17 @@ public class RecipeInfoRecyclerViewAdapter extends RecyclerView.Adapter<RecipeIn
                         final Class<? extends AppCompatActivity> clazzActivity;
                         final Class<? extends Fragment> clazzFragment;
 
-                        final Bundle bundle = new Bundle(2);
-                        ArrayList<Parcelable> listData = new ArrayList<>(2);
-                        // 'mRecipeData' is needed by RecipeInfo(Ingredient/Step)Activity
-                        // when calling back to RecipeInfoActivity when user backs out
-                        listData.add(0, mRecipeData); // 0 for documentation reasons
+                        final Bundle bundle = new Bundle(1);
 
                         // Determine if we're going to show ingredients or steps information ...
                         if (view.getTag() instanceof StepData) {
                             ViewModelProviders.of(mParentActivity).get(DataViewModel.class)
                                     .setStepData((StepData) view.getTag()); // Fragment
-                            listData.add( (Parcelable) view.getTag() );
-                            bundle.putParcelableArrayList(
-                                    MainActivity.KEY_STEP_DATA,
-                                    listData
-                            );
+                            bundle.putParcelable(MainActivity.KEY_STEP_DATA, (Parcelable) view.getTag());
                             clazzActivity = RecipeInfoStepActivity.class;
                             clazzFragment = RecipeInfoStepFragment.class;
                         }
                         else { // Assume List<IngredientData>
-                            //noinspection unchecked
-                            listData.addAll( (List<Parcelable>) view.getTag() );
-                            bundle.putParcelableArrayList(
-                                    MainActivity.KEY_INGREDIENT_DATA,
-                                    listData
-                            );
                             clazzActivity = RecipeInfoIngredientsActivity.class;
                             clazzFragment = RecipeInfoIngredientsFragment.class;
                         }
@@ -122,16 +105,16 @@ public class RecipeInfoRecyclerViewAdapter extends RecyclerView.Adapter<RecipeIn
                                 );
                                 return;
                             }
-                            fragment.setArguments(bundle); // No need when using ViewModelProviders.of
+                            fragment.setArguments(bundle);
                             mParentActivity.getSupportFragmentManager()
                                     .beginTransaction()
                                     .replace(R.id.recipeinfo_fragment_container, fragment)
                                     .commit();
                         } else {
                             Context context = view.getContext();
-                            Intent intent = new Intent(context, clazzActivity);
-                            intent.putExtras(bundle);
-                            context.startActivity(intent);
+                            context.startActivity(
+                                    new Intent(context, clazzActivity)
+                            );
                         }
 
                     }
@@ -141,7 +124,7 @@ public class RecipeInfoRecyclerViewAdapter extends RecyclerView.Adapter<RecipeIn
 
     @Override
     public int getItemCount() {
-        return 1 + mRecipeData.getSteps().size(); // 1 is for all Ingredients
+        return 1 + mRecipeData.getSteps().size(); // 1 is for all Ingredients single text
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {

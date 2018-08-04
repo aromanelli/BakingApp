@@ -2,15 +2,13 @@ package info.romanelli.udacity.bakingapp.data;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.VisibleForTesting;
 
 import com.google.gson.annotations.SerializedName;
 
 import java.util.Objects;
 
 final public class StepData implements Parcelable {
-
-    @SerializedName("id")
-    private int mId;
 
     @SerializedName("shortDescription")
     private String mShortDescription;
@@ -23,10 +21,6 @@ final public class StepData implements Parcelable {
 
     @SerializedName("thumbnailURL")
     private String mURLThumbnail;
-
-    public int getId() {
-        return mId;
-    }
 
     public String getShortDescription() {
         return mShortDescription;
@@ -47,8 +41,7 @@ final public class StepData implements Parcelable {
     @Override
     public String toString() {
         return "StepData{" +
-                "mId=" + mId +
-                ", mShortDescription='" + mShortDescription + '\'' +
+                "mShortDescription='" + mShortDescription + '\'' +
                 ", mDescription='" + mDescription + '\'' +
                 ", mURLVideo='" + mURLVideo + '\'' +
                 ", mURLThumbnail='" + mURLThumbnail + '\'' +
@@ -60,24 +53,42 @@ final public class StepData implements Parcelable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         StepData stepData = (StepData) o;
-        return mId == stepData.mId;
+        return Objects.equals(mShortDescription, stepData.mShortDescription) &&
+                Objects.equals(mDescription, stepData.mDescription);
     }
 
     @Override
     public int hashCode() {
-
-        return Objects.hash(mId);
+        return Objects.hash(mShortDescription, mDescription);
     }
 
-    ////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Values assigned, for testing purposes only
+     * (based on equals() testing parameters) ...<br><br>
+     *
+     * stepData.mShortDescription = "TEST1";<br>
+     * stepData.mDescription = "TEST2";<br>
+     *
+     * @return StepData
+     */
+    @VisibleForTesting
+    static public StepData getTestData() {
+        StepData stepData = new StepData(null);
+        stepData.mShortDescription = "TEST1";
+        stepData.mDescription = "TEST2";
+        return stepData;
+    }
 
     @SuppressWarnings("WeakerAccess")
     protected StepData(Parcel in) {
-        mId = in.readInt();
-        mShortDescription = in.readString();
-        mDescription = in.readString();
-        mURLVideo = in.readString();
-        mURLThumbnail = in.readString();
+        if (in != null) {
+            mShortDescription = in.readString();
+            mDescription = in.readString();
+            mURLVideo = in.readString();
+            mURLThumbnail = in.readString();
+        }
     }
 
     public static final Creator<StepData> CREATOR = new Creator<StepData>() {
@@ -99,7 +110,6 @@ final public class StepData implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(mId);
         dest.writeString(mShortDescription);
         dest.writeString(mDescription);
         dest.writeString(mURLVideo);

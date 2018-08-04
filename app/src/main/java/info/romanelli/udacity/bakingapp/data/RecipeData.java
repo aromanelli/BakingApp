@@ -17,9 +17,6 @@ final public class RecipeData implements Parcelable {
     // POJO design coded by me, confirmed via http://www.jsonschema2pojo.org/
     final static private String TAG = RecipeData.class.getSimpleName();
 
-    @SerializedName("id")
-    private int mId;
-
     @SerializedName("name")
     private String mName;
 
@@ -36,18 +33,6 @@ final public class RecipeData implements Parcelable {
     private String mImage;
 
     private Uri mImageUri;
-
-    @VisibleForTesting
-    public RecipeData() {
-        super();
-        // MUST be ArrayList, to match RecipeData(Parcel) assignment, and for testing purposes.
-        mIngredients = new ArrayList<>(); // MUST be ArrayList
-        mSteps = new ArrayList<>();
-    }
-
-    public int getId() {
-        return mId;
-    }
 
     public String getName() {
         return mName;
@@ -94,8 +79,7 @@ final public class RecipeData implements Parcelable {
     @Override
     public String toString() {
         return "\nRecipeData{" +
-                "mId=" + mId +
-                ", mName='" + mName + '\'' +
+                "mName='" + mName + '\'' +
                 ", mServings=" + mServings +
                 ", mImage='" + mImage + '\'' +
                 ", mImageUri='" + mImageUri + '\'' +
@@ -104,36 +88,59 @@ final public class RecipeData implements Parcelable {
                 "}";
     }
 
+
+
+    ////////////////////////////////////////////////////////////////////////////////
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RecipeData that = (RecipeData) o;
-        return mId == that.mId &&
-                Objects.equals(mName, that.mName);
+        return Objects.equals(mName, that.mName);
     }
 
     @Override
     public int hashCode() {
-
-        return Objects.hash(mId, mName);
+        return Objects.hash(mName);
     }
 
-    ////////////////////////////////////////////////////////////////////////////////
+    /**
+     * Values assigned, for testing purposes only
+     * (based on equals() testing parameters) ...<br><br>
+     *
+     * recipeData.mName = "TEST";<br>
+     *
+     * @return RecipeData
+     */
+    @VisibleForTesting
+    static public RecipeData getTestData() {
+        RecipeData recipeData = new RecipeData(null);
+//        // MUST be ArrayList, to match RecipeData(Parcel) assignment, and for testing purposes.
+//        mIngredients = new ArrayList<>(); // MUST be ArrayList
+//        mSteps = new ArrayList<>(); // MUST be ArrayList
+        recipeData.mName = "TEST";
+        return recipeData;
+    }
 
     @SuppressWarnings("WeakerAccess")
     protected RecipeData(Parcel in) {
-        mId = in.readInt();
-        mName = in.readString();
+        if (in != null) {
+            mName = in.readString();
 
-        //noinspection unchecked
-        mIngredients = in.readArrayList(IngredientData.class.getClassLoader());
-        //noinspection unchecked
-        mSteps = in.readArrayList(StepData.class.getClassLoader());
+            //noinspection unchecked
+            mIngredients = in.readArrayList(IngredientData.class.getClassLoader());
+            //noinspection unchecked
+            mSteps = in.readArrayList(StepData.class.getClassLoader());
 
-        mServings = in.readInt();
-        mImage = in.readString();
-        mImageUri = in.readParcelable(Uri.class.getClassLoader());
+            mServings = in.readInt();
+            mImage = in.readString();
+            mImageUri = in.readParcelable(Uri.class.getClassLoader());
+        } else {
+            // MUST be ArrayList, to match RecipeData(Parcel) assignment, and for testing purposes.
+            mIngredients = new ArrayList<>(); // MUST be ArrayList
+            mSteps = new ArrayList<>(); // MUST be ArrayList
+        }
     }
 
     public static final Creator<RecipeData> CREATOR = new Creator<RecipeData>() {
@@ -155,7 +162,6 @@ final public class RecipeData implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(mId);
         dest.writeString(mName);
         dest.writeList(mIngredients);
         dest.writeList(mSteps);

@@ -5,15 +5,13 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.List;
-
 import info.romanelli.udacity.bakingapp.data.IngredientData;
-import info.romanelli.udacity.bakingapp.data.RecipeData;
 
 /**
  * A fragment representing a single RecipeInfo detail screen.
@@ -23,12 +21,6 @@ import info.romanelli.udacity.bakingapp.data.RecipeData;
  * on handsets.
  */
 public class RecipeInfoIngredientsFragment extends Fragment {
-
-    /**
-     * The recipe content this fragment is presenting.
-     */
-    private RecipeData mRecipeData;
-    private List<IngredientData> mListIngredientData;
 
     /**
      * Mandatory empty constructor for the fragment manager to
@@ -41,35 +33,11 @@ public class RecipeInfoIngredientsFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-//        if ((getArguments() != null) && getArguments().containsKey(MainActivity.KEY_STEP_DATA)) {
-//
-//            List<Parcelable> listData = getArguments().getParcelableArrayList(MainActivity.KEY_STEP_DATA);
-//            if (listData != null) {
-//                mRecipeData = (RecipeData) listData.get(0);
-//                if (mRecipeData == null)
-//                    throw new IllegalStateException("Expected a " + RecipeData.class.getSimpleName() + " reference!");
-//                mListIngredientData = (IngredientData) listData.get(1);
-//                if (mListIngredientData == null)
-//                    throw new IllegalStateException("Expected a " + IngredientData.class.getSimpleName() + " reference!");
-//            }
-//
-//        }
-
         Activity activity = this.getActivity();
         if (activity != null) {
-
-            mRecipeData = ViewModelProviders.of(getActivity()).get(DataViewModel.class).getRecipeData();
-                if (mRecipeData == null)
-                    throw new IllegalStateException("Expected a " + RecipeData.class.getSimpleName() + " reference!");
-
-            mListIngredientData = ViewModelProviders.of(getActivity()).get(DataViewModel.class).getRecipeData().getIngredients();
-                if (mListIngredientData == null)
-                    throw new IllegalStateException("Expected a List<" + IngredientData.class.getSimpleName() + "> reference!");
-
             // Needed for when fragment is in a solo activity
-            activity.setTitle(mRecipeData.getName());
+            activity.setTitle(ViewModelProviders.of(getActivity()).get(DataViewModel.class).getRecipeData().getName());
         }
-
     }
 
     @Override
@@ -81,10 +49,12 @@ public class RecipeInfoIngredientsFragment extends Fragment {
                 R.layout.recipeinfo_ingredients_content, container, false);
 
         // Show the dummy content as text in a TextView.
-        if (mRecipeData != null) {
-            StringBuilder builder = new StringBuilder();
-            for (IngredientData ingredientData : mListIngredientData) {
-                // TODO Swapping languages while in detail activity then hitting back button causes a IllegalFormatConversionException.
+        StringBuilder builder = new StringBuilder();
+        FragmentActivity activity = getActivity();
+        if (activity != null) {
+            for (IngredientData ingredientData :
+                    ViewModelProviders.of(activity).get(DataViewModel.class).getRecipeData().getIngredients()) {
+                // TODO AOR Swapping languages while in detail activity then hitting back button causes a IllegalFormatConversionException.
                 String text = getString(
                         R.string.ingredient_detail,
                         ingredientData.getQuantity(),
@@ -94,10 +64,13 @@ public class RecipeInfoIngredientsFragment extends Fragment {
                 builder.append(text);
                 builder.append('\n');
             }
-            ((TextView) rootView.findViewById(R.id.recipeinfo_ingredients_content)).setText(
-                    builder.toString()
-            );
+        } else {
+            // TODO AOR REMOVE BELOW WHEN DESIGN FIXED
+            builder.append("Need an Activity reference to be able to display ingredients!");
         }
+        ((TextView) rootView.findViewById(R.id.recipeinfo_ingredients_content)).setText(
+                builder.toString()
+        );
 
         return rootView;
     }

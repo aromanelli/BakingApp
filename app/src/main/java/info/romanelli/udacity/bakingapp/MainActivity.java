@@ -15,7 +15,7 @@ import android.widget.ImageView;
 import java.util.ArrayList;
 import java.util.List;
 
-import info.romanelli.udacity.bakingapp.data.AppDatabase;
+import info.romanelli.udacity.bakingapp.data.DataManager;
 import info.romanelli.udacity.bakingapp.data.RecipeData;
 import info.romanelli.udacity.bakingapp.network.NetUtil;
 import info.romanelli.udacity.bakingapp.network.RecipesFetcher;
@@ -27,8 +27,6 @@ public class MainActivity
     final static private String TAG = MainActivity.class.getSimpleName();
 
     final static public String KEY_BUNDLE_RV_ITEM_POS = "key_bundle_recyclerview_item_position";
-    final static public String KEY_RECIPE_DATA = "key_recipe_data";
-    final static public String KEY_INGREDIENT_DATA = "key_ingredient_data";
     final static public String KEY_STEP_DATA = "key_step_data";
 
     private RecyclerView mViewRecipes;
@@ -58,9 +56,11 @@ public class MainActivity
 
         // If first-time call, fetched movie info data ...
         if (savedInstanceState == null ) {
-            AppDatabase.init(this); // Done only once
-            DataViewModel.resetAppDataDBRecord();
+
+            DataManager.init(this);
+
             if (NetUtil.isOnline(this)) {
+                mIndexFirstVisibleItem =0;
                 RecipesFetcher.fetchRecipes(this, this);
             } else {
                 new AlertDialog.Builder(this)
@@ -94,25 +94,12 @@ public class MainActivity
 
             mIndexFirstVisibleItem = 0;
 
-            // A fetching error could end up causing a null
-            // to be passed in, and we don't want nulls.
+            // A net fetching error could end up causing a
+            // null to be passed in, and we don't want nulls.
             recipes = new ArrayList<>(0);
         }
 
-        ////////////////////////////////////////////////////////////////
-
-//        // Listen for changes to the app data ...
-//        ViewModelProviders.of(MainActivity.this).get(DataViewModel.class)
-//                .getLiveData().observe(this, new Observer<AppDataEntry>() {
-//            @Override
-//            public void onChanged(@Nullable AppDataEntry appDataEntry) {
-//                Log.d(TAG, "onChanged() called with: appDataEntry = [" + appDataEntry + "]");
-//            }
-//        });
-
         ViewModelProviders.of(this).get(DataViewModel.class).setRecipes(recipes);
-
-        ////////////////////////////////////////////////////////////////
 
         mAdapterRecipes.setData(recipes);
         mViewRecipes.getLayoutManager().scrollToPosition(mIndexFirstVisibleItem);
@@ -131,11 +118,9 @@ public class MainActivity
     @Override
     public void onRecipeClick(RecipeData recipe, ImageView ivPoster) {
         ViewModelProviders.of(this).get(DataViewModel.class).setRecipeData(recipe);
-        final Bundle bundle = new Bundle(1);
-        bundle.putParcelable(KEY_RECIPE_DATA, recipe);
-        final Intent intent = new Intent(MainActivity.this, RecipeInfoActivity.class);
-        intent.putExtras(bundle);
-        startActivity(intent);
+        startActivity(
+                new Intent(MainActivity.this, RecipeInfoActivity.class)
+        );
     }
 
 }

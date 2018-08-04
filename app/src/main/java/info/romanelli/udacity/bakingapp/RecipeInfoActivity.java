@@ -10,8 +10,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 
-import info.romanelli.udacity.bakingapp.data.RecipeData;
-
 /**
  * An activity representing a list of RecipeInfos. This activity
  * has different presentations for handset and tablet-size devices. On
@@ -28,23 +26,12 @@ public class RecipeInfoActivity extends AppCompatActivity {
      */
     private boolean mTwoPane;
 
-    private RecipeData mRecipeData;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipeinfo);
 
-        if (savedInstanceState == null) {
-            mRecipeData = getIntent().getParcelableExtra(MainActivity.KEY_RECIPE_DATA);
-        } else {
-            mRecipeData = ViewModelProviders.of(this).get(DataViewModel.class).getRecipeData();
-        }
-        if (mRecipeData == null) {
-            throw new IllegalStateException("Expected a " + RecipeData.class.getSimpleName() + " reference!");
-        }
-
-        setTitle(mRecipeData.getName());
+        setTitle(ViewModelProviders.of(this).get(DataViewModel.class).getRecipeData().getName());
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -67,7 +54,11 @@ public class RecipeInfoActivity extends AppCompatActivity {
         View recyclerView = findViewById(R.id.rvRecipeInfo);
         assert recyclerView != null;
         ((RecyclerView) recyclerView).setAdapter(
-                new RecipeInfoRecyclerViewAdapter(this, mTwoPane, mRecipeData)
+                new RecipeInfoRecyclerViewAdapter(
+                        this,
+                        mTwoPane,
+                        ViewModelProviders.of(this).get(DataViewModel.class).getRecipeData()
+                )
         );
 
     }

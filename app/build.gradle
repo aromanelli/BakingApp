@@ -16,19 +16,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    testOptions {
-        // Needed for DataViewModelTest/AppDatabase not mocked error
-        unitTests.returnDefaultValues = true
-    }
 }
 
 dependencies {
 
-    //////////////////////////////////////////////////////////////////////////////////////
-    annotationProcessor "android.arch.lifecycle:compiler:1.1.1"
-    implementation "android.arch.lifecycle:livedata:1.1.1"
-    implementation "android.arch.persistence.room:runtime:1.1.1"
-    annotationProcessor "android.arch.persistence.room:compiler:1.1.1"
     //////////////////////////////////////////////////////////////////////////////////////
     implementation 'com.android.support:support-v13:27.1.1' // Fragment / ViewPager
     //////////////////////////////////////////////////////////////////////////////////////

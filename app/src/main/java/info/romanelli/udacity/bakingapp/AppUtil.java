@@ -17,6 +17,20 @@ public final class AppUtil {
     static private CountDownTimer TIMER;
 
     static public void showToast(final Context owner, final String message, final boolean delayShowing) {
+
+        // TODO AOR Using android.os.Handler class removes allot of below code?
+        /*
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    ...
+                }
+            },
+            DELAY_MILLIS
+        );
+         */
+
         Log.d(TAG, "showToast() called with: owner = [" + owner + "], message = [" +
                 message + "], pending = ["+ PENDING_TOAST.get() +"] " + Thread.currentThread().getName());
 

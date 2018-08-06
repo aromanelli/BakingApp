@@ -45,7 +45,7 @@ public class DataManager {
                     Log.d(TAG, "$: Creating data manager for Context [" + context + "]!");
                     REF = new DataManager(context);
                 } else {
-                    Log.w(TAG, DataManager.class.getSimpleName() + " is already initialized." );
+                    Log.d(TAG, DataManager.class.getSimpleName() + " is already initialized." );
                 }
             }
         }

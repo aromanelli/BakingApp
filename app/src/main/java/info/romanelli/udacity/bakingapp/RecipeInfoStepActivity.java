@@ -14,9 +14,12 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.List;
 
 import info.romanelli.udacity.bakingapp.data.StepData;
+import info.romanelli.udacity.bakingapp.event.StepDataEvent;
 
 /**
  * An activity representing a single RecipeInfo detail screen. This
@@ -70,12 +73,11 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
             if (index < 0) {
                 throw new IllegalStateException("Bad index for StepData!");
             }
-            mPager.setCurrentItem(index);
+            setCurrentPage(index);
 
             mPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
                 @Override
                 public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                    Log.d(TAG, "onPageScrolled() called with: position = [" + position + "], positionOffset = [" + positionOffset + "], positionOffsetPixels = [" + positionOffsetPixels + "]");
                 }
                 @Override
                 public void onPageSelected(int position) {
@@ -84,15 +86,22 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
                             .getRecipeData().getSteps().get(position);
                     ViewModelProviders.of(RecipeInfoStepActivity.this).get(DataViewModel.class)
                             .setStepData(stepData);
+                    // Tell any video players to stop, as a switch is about to happen ...
+                    EventBus.getDefault().post(
+                            new StepDataEvent(StepDataEvent.Type.SELECTED, position, stepData)
+                    );
                 }
                 @Override
                 public void onPageScrollStateChanged(int state) {
-                    Log.d(TAG, "onPageScrollStateChanged() called with: state = [" + state + "]");
                 }
             });
 
         }
 
+    }
+
+    private void setCurrentPage(final int index) {
+        mPager.setCurrentItem(index);
     }
 
     @Override
@@ -112,14 +121,21 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        // TODO AOR On Nexus 10 view a step vertically, rotate to horizontal, then press below back button, causes mPager to be null.
-        if (mPager.getCurrentItem() == 0) {
-            // If the user is currently looking at the first step, allow the system to handle the
-            // Back button. This calls finish() on this activity and pops the back stack.
-            super.onBackPressed();
+        /////////////////////////////////////////////////////////////////
+        // On Nexus 10, view a step vertically, rotate to horizontal, see
+        // blank view, then press below back button, mPager to be null.
+        /////////////////////////////////////////////////////////////////
+        if (mPager != null) {
+            if (mPager.getCurrentItem() == 0) {
+                // If the user is currently looking at the first step, allow the system to handle the
+                // Back button. This calls finish() on this activity and pops the back stack.
+                super.onBackPressed();
+            } else {
+                // Otherwise, select the previous step.
+                setCurrentPage(mPager.getCurrentItem() - 1);
+            }
         } else {
-            // Otherwise, select the previous step.
-            mPager.setCurrentItem(mPager.getCurrentItem() - 1);
+            super.onBackPressed();
         }
     }
 
@@ -150,6 +166,7 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
 
             Bundle bundle = new Bundle();
             bundle.putParcelable(MainActivity.KEY_STEP_DATA, stepData);
+            bundle.putInt(MainActivity.KEY_INDEX_STEP_DATA, position);
 
             // https://developer.android.com/topic/libraries/architecture/viewmodel#sharing
             RecipeInfoStepFragment fragment = new RecipeInfoStepFragment();

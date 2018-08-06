@@ -423,7 +423,6 @@ public class VideoPlayerManager implements Player.EventListener {
      * Broadcast Receiver registered to receive the MEDIA_BUTTON intent coming from clients.
      */
     public static class MediaReceiver extends BroadcastReceiver {
-        // TODO AOR Needed?  Taken from AdvancedAndroid_ClassicalMusicQuiz:TMED.06-Solution
         final static private String TAG = VideoPlayerManager.TAG + "|" + MediaReceiver.class.getSimpleName();
         public MediaReceiver() {
             super();

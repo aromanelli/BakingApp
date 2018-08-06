@@ -157,6 +157,7 @@ public class RecipeInfoStepFragment extends Fragment {
     public void onVideoPlayerEvent(StepDataEvent event) {
         if (event.getType().equals(StepDataEvent.Type.SELECTED)) {
             stopPlayer();
+            // TODO AOR Handle notification area on switched fragment
         }
     }
 

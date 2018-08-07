@@ -105,12 +105,11 @@ public class DataManager {
     }
 
     public void setStepData(final StepData stepData) {
-        if (stepData == null) throw new IllegalArgumentException("Non-null reference expected!");
         mStepData = stepData;
         SharedPreferences.Editor editor = mPrefs.edit();
         editor.putString(
                 StepData.class.getSimpleName(),
-                new StepDataConverter().toString(stepData)
+                new StepDataConverter().toString(mStepData)
         );
         editor.apply();
     }

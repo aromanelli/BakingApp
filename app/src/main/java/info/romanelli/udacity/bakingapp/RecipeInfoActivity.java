@@ -78,7 +78,7 @@ public class RecipeInfoActivity extends AppCompatActivity {
                     new RecipeInfoFragmentsPagerAdapter(
                             getSupportFragmentManager(), this, mTwoPane)
             );
-//            mPager.setOffscreenPageLimit(mPagerAdapter.getCount());
+            // mPager.setOffscreenPageLimit(mPagerAdapter.getCount());
 
 // TODO AOR Handle rotation and if below code is needed, like dup code is in RecipeInfoStepActivity and needed there!
 //        List<StepData> listStepData =
@@ -139,10 +139,6 @@ public class RecipeInfoActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        /////////////////////////////////////////////////////////////////
-        // On Nexus 10, view a step vertically, rotate to horizontal, see
-        // blank view, then press below back button, mPager to be null.
-        /////////////////////////////////////////////////////////////////
         if (mPager != null) {
             if (mPager.getCurrentItem() == 0) {
                 // If the user is currently looking at the first step, allow the system to handle the
@@ -167,8 +163,10 @@ public class RecipeInfoActivity extends AppCompatActivity {
             // more details, see the Navigation pattern on Android Design:
             //
             // http://developer.android.com/design/patterns/navigation.html#up-vs-back
-            //
+
             NavUtils.navigateUpFromSameTask(this);
+            // navigateUpTo( new Intent(this, RecipeInfoActivity.class) );
+
             return true;
         }
         return super.onOptionsItemSelected(item);

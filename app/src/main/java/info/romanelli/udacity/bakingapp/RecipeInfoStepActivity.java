@@ -1,8 +1,8 @@
 package info.romanelli.udacity.bakingapp;
 
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -36,12 +36,13 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
         setContentView(R.layout.activity_recipeinfo_step);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        // Show the Up button in the action bar.
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+            // Show the Up button in the action bar.
+            ActionBar actionBar = getSupportActionBar();
+            if (actionBar != null) {
+                actionBar.setDisplayHomeAsUpEnabled(true);
+            }
         }
 
         // savedInstanceState is non-null when there is fragment state
@@ -61,7 +62,7 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
                     new RecipeInfoFragmentsPagerAdapter(
                             getSupportFragmentManager(), this, false)
             );
-//                mPager.setOffscreenPageLimit(mPagerAdapter.getCount());
+            // mPager.setOffscreenPageLimit(mPagerAdapter.getCount());
 
             List<StepData> listStepData =
                     ViewModelProviders.of(this).get(DataViewModel.class).getRecipeData().getSteps();
@@ -99,15 +100,13 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
     }
 
     protected void setCurrentPage(final int index) {
-        mPager.setCurrentItem(index);
+        if (mPager != null) {
+            mPager.setCurrentItem(index);
+        }
     }
 
     @Override
     public void onBackPressed() {
-        /////////////////////////////////////////////////////////////////
-        // On Nexus 10, view a step vertically, rotate to horizontal, see
-        // blank view, then press below back button, mPager to be null.
-        /////////////////////////////////////////////////////////////////
         if (mPager != null) {
             if (mPager.getCurrentItem() == 0) {
                 // If the user is currently looking at the first step, allow the system to handle the
@@ -118,7 +117,7 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
                 setCurrentPage(mPager.getCurrentItem() - 1);
             }
         } else {
-            super.onBackPressed();
+            NavUtils.navigateUpFromSameTask(this);
         }
     }
 
@@ -131,10 +130,16 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
             // more details, see the Navigation pattern on Android Design:
             // http://developer.android.com/design/patterns/navigation.html#up-vs-back
 
-            navigateUpTo( new Intent(this, RecipeInfoActivity.class) );
+            NavUtils.navigateUpFromSameTask(this);
+            // navigateUpTo( new Intent(this, RecipeInfoActivity.class) );
+
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
 }

@@ -48,6 +48,7 @@ public class RecipeInfoStepFragment extends Fragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
 
         mActivity = this.getActivity();
@@ -77,7 +78,6 @@ public class RecipeInfoStepFragment extends Fragment {
             mIdFragment = getArguments().getInt(MainActivity.KEY_INDEX_STEP_DATA);
             if (mIdFragment == Integer.MIN_VALUE)
                 throw new IllegalStateException("Expected a fragment identifier value!");
-
         }
 
         // Needed for when fragment is in a solo mActivity
@@ -123,9 +123,10 @@ public class RecipeInfoStepFragment extends Fragment {
         }
 
         // Show the dummy content as text in a TextView.
-        ((TextView) rootView.findViewById(R.id.recipeinfo_step_description)).setText(
-                mStepData.getDescription()
-        );
+        TextView tvStepDesc = rootView.findViewById(R.id.recipeinfo_step_description);
+        if (tvStepDesc != null) {
+            tvStepDesc.setText(mStepData.getDescription());
+        }
 
         return rootView;
     }

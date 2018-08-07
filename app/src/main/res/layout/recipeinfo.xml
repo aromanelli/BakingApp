@@ -10,4 +10,4 @@
     android:layout_marginRight="16dp"
     app:layoutManager="android.support.v7.widget.LinearLayoutManager"
     tools:context=".RecipeInfoActivity"
-    tools:listitem="@layout/recipeinfo_content" />
+    tools:listitem="@layout/recipeinfo_parts_container" />

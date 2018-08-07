@@ -65,7 +65,11 @@ public class RecipeInfoIngredientsActivity extends AppCompatActivity {
             RecipeInfoIngredientsFragment fragment = new RecipeInfoIngredientsFragment();
 //            fragment.setArguments(bundle);
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.recipeinfo_ingredients_container, fragment)
+                    .replace(
+                            R.id.recipeinfo_ingredients_container,
+                            fragment,
+                            RecipeInfoIngredientsFragment.class.getSimpleName()
+                    )
                     .commit();
         }
 

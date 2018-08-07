@@ -4,22 +4,16 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import org.greenrobot.eventbus.EventBus;
-
 import info.romanelli.udacity.bakingapp.data.RecipeData;
 import info.romanelli.udacity.bakingapp.data.StepData;
-import info.romanelli.udacity.bakingapp.event.StepDataEvent;
 
 public class RecipeInfoRecyclerViewAdapter extends RecyclerView.Adapter<RecipeInfoRecyclerViewAdapter.ViewHolder> {
 
@@ -42,7 +36,7 @@ public class RecipeInfoRecyclerViewAdapter extends RecyclerView.Adapter<RecipeIn
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.recipeinfo_content, parent, false);
+                .inflate(R.layout.recipeinfo_parts_container, parent, false);
         return new ViewHolder(view);
     }
 
@@ -73,64 +67,36 @@ public class RecipeInfoRecyclerViewAdapter extends RecyclerView.Adapter<RecipeIn
                     @Override
                     public void onClick(View view) {
 
-                        int index = (int) view.getTag();
-
-                        final Class<? extends AppCompatActivity> clazzActivity;
-                        final Class<? extends Fragment> clazzFragment;
-
-                        final Bundle bundle = new Bundle(1);
-
-                        // Determine if we're going to show ingredients or steps information ...
-
-                        StepData stepData = null;
-                        int stepIndex = Integer.MIN_VALUE;
-                        if (index == 0) {
-                            // User selected the List<IngredientsData> entry ...
-                            clazzActivity = RecipeInfoIngredientsActivity.class;
-                            clazzFragment = RecipeInfoIngredientsFragment.class;
-                        } else {
-                            // User selected a StepData entry ...
-                            stepIndex = index - 1;
-                            stepData = mRecipeData.getSteps().get(stepIndex);
-                            ViewModelProviders.of(mParentActivity).get(DataViewModel.class)
-                                    .setStepData(stepData); // Fragment
-                            bundle.putParcelable(MainActivity.KEY_STEP_DATA, stepData);
-                            bundle.putInt(MainActivity.KEY_INDEX_STEP_DATA, stepIndex);
-
-                            clazzActivity = RecipeInfoStepActivity.class;
-                            clazzFragment = RecipeInfoStepFragment.class;
-                        }
-
                         // Launch activity, or set fragment, based on if two panes or not ...
+                        int index = (int) view.getTag();
                         if (mTwoPane) {
-                            // https://developer.android.com/topic/libraries/architecture/viewmodel#sharing
-                            Fragment fragment;
-                            try {
-
-                                // TODO AOR Recreate a new fragment, vs. reusing an old one?
-                                fragment = clazzFragment.newInstance();
-                                // Look at RecipeInfoStepPagerAdapter/FragmentStatePagerAdapter, as that is what RecipeInfoStepActivity uses
-
-                            } catch (InstantiationException | IllegalAccessException e) {
-                                Log.e(TAG, "Error creating Fragment ["+ clazzFragment +"]: ", e);
-                                AppUtil.showToast(
-                                        mParentActivity,
-                                        mParentActivity.getString(R.string.msg_err_occurred),
-                                        false
-                                );
-                                return;
-                            }
-                            // Notify fragments with video players that one was selected, so stop your player, etc. ...
-                            EventBus.getDefault().post(
-                                    new StepDataEvent(StepDataEvent.Type.SELECTED, stepIndex, stepData)
-                            );
-
-                            fragment.setArguments(bundle);
-                            mParentActivity.getSupportFragmentManager()
-                                    .beginTransaction()
-                                    .replace(R.id.recipeinfo_fragment_container, fragment)
-                                    .commit();
+                            mParentActivity.setCurrentPage(index);
                         } else {
+
+                            // In two pane mode, OnPageChangeListener on ViewPager will do
+                            // the below setting for us, but when we instead launch an Activity
+                            // directly, we need to set StepData ourselves, before launch ...
+                            StepData stepData;
+                            if (index == 0) {
+                                stepData = null; // Ingredients chosen
+                            } else {
+                                stepData = ViewModelProviders.of(mParentActivity).get(DataViewModel.class)
+                                        .getRecipeData().getSteps().get((index - 1));
+                            }
+                            ViewModelProviders.of(mParentActivity).get(DataViewModel.class)
+                                    .setStepData(stepData);
+
+                            // Determine if we're going to show ingredients or steps information ...
+                            final Class<? extends AppCompatActivity> clazzActivity;
+                            if (index == 0) {
+                                // User selected the List<IngredientsData> entry ...
+                                clazzActivity = RecipeInfoIngredientsActivity.class;
+                            } else {
+                                // User selected a StepData entry ...
+                                clazzActivity = RecipeInfoStepActivity.class;
+                                // RecipeInfoFragmentsPagerAdapter handled instantiation of fragments already
+                            }
+                            // Launch the Activity ...
                             Context context = view.getContext();
                             context.startActivity(
                                     new Intent(context, clazzActivity)

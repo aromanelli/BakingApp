@@ -3,10 +3,6 @@ package info.romanelli.udacity.bakingapp;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -32,7 +28,6 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
     final static private String TAG = RecipeInfoStepActivity.class.getSimpleName();
 
     private ViewPager mPager;
-    private PagerAdapter mPagerAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,17 +53,18 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
         //
         // http://developer.android.com/guide/components/fragments.html
 
-        if (savedInstanceState == null) {
-
-            // Instantiate a ViewPager and a PagerAdapter ...
-            // (https://developer.android.com/training/animation/screen-slide)
-            mPager = findViewById(R.id.pager);
-            mPagerAdapter = new RecipeInfoStepPagerAdapter(getSupportFragmentManager(), this);
-            mPager.setAdapter(mPagerAdapter);
+        // Instantiate a ViewPager and a PagerAdapter ...
+        // (https://developer.android.com/training/animation/screen-slide)
+        mPager = findViewById(R.id.pager);
+        if (mPager != null) { // Only our 'two pane' tablet view has a pager, phone view does not!
+            mPager.setAdapter(
+                    new RecipeInfoFragmentsPagerAdapter(
+                            getSupportFragmentManager(), this, false)
+            );
+//                mPager.setOffscreenPageLimit(mPagerAdapter.getCount());
 
             List<StepData> listStepData =
                     ViewModelProviders.of(this).get(DataViewModel.class).getRecipeData().getSteps();
-            mPager.setOffscreenPageLimit( listStepData.size() );
             int index = listStepData.indexOf(ViewModelProviders.of(this).get(DataViewModel.class).getStepData());
             if (index < 0) {
                 throw new IllegalStateException("Bad index for StepData!");
@@ -76,9 +72,11 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
             setCurrentPage(index);
 
             mPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                // TODO AOR Consolidate this listener code with RecipeInfoActivity's version!
                 @Override
                 public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
                 }
+
                 @Override
                 public void onPageSelected(int position) {
                     Log.d(TAG, "onPageSelected() called with: position = [" + position + "]");
@@ -91,32 +89,17 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
                             new StepDataEvent(StepDataEvent.Type.SELECTED, position, stepData)
                     );
                 }
+
                 @Override
                 public void onPageScrollStateChanged(int state) {
                 }
             });
-
         }
 
     }
 
-    private void setCurrentPage(final int index) {
+    protected void setCurrentPage(final int index) {
         mPager.setCurrentItem(index);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == android.R.id.home) {
-            // android.R.id.home represents the Home or Up button. In
-            // the case of this activity, the Up button is shown. For
-            // more details, see the Navigation pattern on Android Design:
-            // http://developer.android.com/design/patterns/navigation.html#up-vs-back
-
-            navigateUpTo( new Intent(this, RecipeInfoActivity.class) );
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -139,48 +122,19 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
         }
     }
 
-    static private class RecipeInfoStepPagerAdapter extends FragmentStatePagerAdapter {
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == android.R.id.home) {
+            // android.R.id.home represents the Home or Up button. In
+            // the case of this activity, the Up button is shown. For
+            // more details, see the Navigation pattern on Android Design:
+            // http://developer.android.com/design/patterns/navigation.html#up-vs-back
 
-        final static private String TAG = RecipeInfoStepPagerAdapter.class.getSimpleName();
-
-        private RecipeInfoStepActivity parentActivity;
-
-        RecipeInfoStepPagerAdapter(FragmentManager fm, RecipeInfoStepActivity parentActivity) {
-            super(fm);
-            this.parentActivity = parentActivity;
+            navigateUpTo( new Intent(this, RecipeInfoActivity.class) );
+            return true;
         }
-
-        @Override
-        public Fragment getItem(int position) {
-
-            /*
-            The FragmentPagerAdapter instantiates 2 Fragments on start, for index 0 and
-            for index 1.  If you want to get data from the Fragment which is on the screen,
-            you can use addOnPageChangeListener for the Pager to get current position.
-             */
-
-            // In this case, instead of just calling getStepData(), we use 'position' on getSteps() list ...
-            StepData stepData = ViewModelProviders.of(parentActivity).get(DataViewModel.class)
-                    .getRecipeData().getSteps().get(position);
-            Log.d(TAG, "getItem: position: " + position + ", stepData: " + stepData);
-
-            Bundle bundle = new Bundle();
-            bundle.putParcelable(MainActivity.KEY_STEP_DATA, stepData);
-            bundle.putInt(MainActivity.KEY_INDEX_STEP_DATA, position);
-
-            // https://developer.android.com/topic/libraries/architecture/viewmodel#sharing
-            RecipeInfoStepFragment fragment = new RecipeInfoStepFragment();
-            fragment.setArguments(bundle);
-
-            return fragment;
-        }
-
-        @Override
-        public int getCount() {
-            return ViewModelProviders.of(parentActivity).get(DataViewModel.class)
-                    .getRecipeData().getSteps().size();
-        }
-
+        return super.onOptionsItemSelected(item);
     }
 
 }

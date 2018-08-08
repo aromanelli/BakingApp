@@ -5,18 +5,21 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.exoplayer2.ui.PlayerView;
+import com.squareup.picasso.Picasso;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+
+import java.io.IOException;
 
 import info.romanelli.udacity.bakingapp.data.StepData;
 import info.romanelli.udacity.bakingapp.event.StepDataEvent;
@@ -95,34 +98,76 @@ public class RecipeInfoStepFragment extends Fragment {
 
         View rootView = inflater.inflate(R.layout.recipeinfo_step_content, container, false);
 
+        //////////////////////////////////////////////////////////////////////
+        // REVIEWER: The thumbnail URL from the json is a mp4, not an png/jpg,
+        // so assuming we're always just showing a video, or nothing, and not
+        // an image, so not using ImageView.
+        //////////////////////////////////////////////////////////////////////
+
         // Check video URL first, if empty, try thumbnail URL,
         // if empty, null out url so player doesn't show ...
-        String url = mStepData.getURLVideo();
-        if (TextUtils.isEmpty(url)) {
-            url = mStepData.getURLThumbnail();
-            if (TextUtils.isEmpty(url)) {
-                url = null;
+
+        String urlToUse = null; // Null is for using a placeholder image instead
+        try {
+            // See if the Video URL is a valid video/audio ...
+            boolean[] flagsContentType = AppUtil.getContentTypeInfo(mStepData.getURLVideo());
+            if (flagsContentType[0] || flagsContentType[1]) { // Video/Audio
+                urlToUse = mStepData.getURLVideo();
+            } else {
+                // Video URL was a bust, lets try the thumbnail URL ...
+                flagsContentType = AppUtil.getContentTypeInfo(mStepData.getURLThumbnail());
+                if (flagsContentType[0] || flagsContentType[1]) { // Video/Audio
+                    urlToUse = mStepData.getURLThumbnail();
+                } else if (flagsContentType[2]) { // Image
+                    // Thumbnail URL actually points to an Image, not a Video/Audio ...
+                    urlToUse = "IMAGE"; // set flag for below code to load thumbnail image
+                }
             }
+        } catch (IOException ioe) {
+            Log.e(TAG, "onCreateView: Error while determining content types! ["+ mStepData.getURLVideo() +"]["+ mStepData.getURLThumbnail() +"]", ioe);
+            urlToUse = null;
         }
 
         // If we have a video to show, show it ...
         PlayerView playerView = rootView.findViewById(R.id.recipeinfo_step_video);
-        if (!TextUtils.isEmpty(url)) {
-            Log.d(TAG, "onCreateView: mVideoPlayerMgr: " + mVideoPlayerMgr); // TODO AOR REMOVE
+        final ImageView ivThumbnail = rootView.findViewById(R.id.recipeinfo_step_video_thumbnail);
+        if ((! AppUtil.isEmpty(urlToUse)) && (! "IMAGE".equals(urlToUse))) {
+            ivThumbnail.setVisibility(View.GONE);
             mVideoPlayerMgr = new VideoPlayerManager();
             mVideoPlayerMgr.initPlayer(
                     mActivity,
                     playerView,
-                    url,
+                    urlToUse,
                     ViewModelProviders.of(mActivity).get(DataViewModel.class).getRecipeData().getName(),
                     mStepData.getShortDescription(),
                     Integer.MIN_VALUE
             );
         } else {
+            // Hide play video player ...
             playerView.setVisibility(View.GONE);
+            // If we have an image url, display it instead of the default/placeholder image ...
+            if ("IMAGE".equals(urlToUse)) { // Legit url to an image, not null, etc.
+                Picasso.get()
+                        .load(mStepData.getURLThumbnail())
+                        .placeholder(R.drawable.ic_baseline_fastfood_24px)
+                        .into(
+                                ivThumbnail,
+                                new com.squareup.picasso.Callback() {
+                                    @Override
+                                    public void onSuccess() {
+                                        Log.d(TAG, "Picasso:onSuccess: image fetched");
+                                    }
+                                    @Override
+                                    public void onError(Exception e) {
+                                        Log.e(TAG, "Picasso:onError: ", e);
+                                        ivThumbnail.setImageResource(R.drawable.ic_baseline_fastfood_24px);
+                                    }
+                                }
+                        );
+            }
         }
 
-        // Show the dummy content as text in a TextView.
+        // Display the recipe step information ...
         TextView tvStepDesc = rootView.findViewById(R.id.recipeinfo_step_description);
         if (tvStepDesc != null) {
             tvStepDesc.setText(mStepData.getDescription());

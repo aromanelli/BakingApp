@@ -21,4 +21,5 @@
     <string name="msg_err_fetching_recipes">An error has occurred while retrieving the recipes.</string>
     <string name="msg_err_occurred">An error has occurred.</string>
     <string name="ingredient_detail">%1$.1f %2$s of %3$s</string>
+    <string name="default_video_thumbnail_desc">Default thumbnail image, for when there is no video or thumbnail image available.</string>
 </resources>

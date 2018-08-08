@@ -43,4 +43,14 @@ public class StepDataEvent {
     public void setIndexStepData(int indexStepData) {
         this.indexStepData = indexStepData;
     }
+
+    @Override
+    public String toString() {
+        return "StepDataEvent{" +
+                "type=" + type +
+                ", indexStepData=" + indexStepData +
+                ", stepData=" + stepData +
+                '}';
+    }
+
 }

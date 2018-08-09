@@ -7,15 +7,11 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
-
-import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
 
 import info.romanelli.udacity.bakingapp.data.StepData;
-import info.romanelli.udacity.bakingapp.event.StepDataEvent;
 
 /**
  * An activity representing a single RecipeInfo detail screen. This
@@ -34,6 +30,8 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipeinfo_step);
+
+        setTitle(ViewModelProviders.of(this).get(DataViewModel.class).getRecipeData().getName());
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         if (toolbar != null) {
@@ -64,6 +62,7 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
             );
             // mPager.setOffscreenPageLimit(mPagerAdapter.getCount());
 
+            // Set the right page, based on the StepData set into the view model by the recycler view adapter ...
             List<StepData> listStepData =
                     ViewModelProviders.of(this).get(DataViewModel.class).getRecipeData().getSteps();
             int index = listStepData.indexOf(ViewModelProviders.of(this).get(DataViewModel.class).getStepData());
@@ -71,30 +70,6 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
                 throw new IllegalStateException("Bad index for StepData!");
             }
             setCurrentPage(index);
-
-            mPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-                // TODO AOR Consolidate this listener code with RecipeInfoActivity's version!
-                @Override
-                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                }
-
-                @Override
-                public void onPageSelected(int position) {
-                    Log.d(TAG, "onPageSelected() called with: position = [" + position + "]");
-                    StepData stepData = ViewModelProviders.of(RecipeInfoStepActivity.this).get(DataViewModel.class)
-                            .getRecipeData().getSteps().get(position);
-                    ViewModelProviders.of(RecipeInfoStepActivity.this).get(DataViewModel.class)
-                            .setStepData(stepData);
-                    // Tell any video players to stop, as a switch is about to happen ...
-                    EventBus.getDefault().post(
-                            new StepDataEvent(StepDataEvent.Type.SELECTED, position, stepData)
-                    );
-                }
-
-                @Override
-                public void onPageScrollStateChanged(int state) {
-                }
-            });
         }
 
     }

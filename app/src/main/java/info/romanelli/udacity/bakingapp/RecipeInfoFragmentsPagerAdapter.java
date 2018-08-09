@@ -53,14 +53,12 @@ public class RecipeInfoFragmentsPagerAdapter extends FragmentStatePagerAdapter {
 
             Bundle bundle = new Bundle();
             bundle.putParcelable(MainActivity.KEY_STEP_DATA, stepData);
-            bundle.putInt(MainActivity.KEY_INDEX_STEP_DATA, stepIndex);
 
             // https://developer.android.com/topic/libraries/architecture/viewmodel#sharing
             RecipeInfoStepFragment fragment = new RecipeInfoStepFragment();
             fragment.setArguments(bundle);
 
             return fragment;
-
         }
     }
 

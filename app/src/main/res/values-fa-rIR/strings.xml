@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name">زمان پخت</string>
     <string name="msg_retrieving_data">گرفتن اطلاعات</string>
     <string name="msg_offline">آفلاین</string>
@@ -23,4 +23,14 @@
     <string name="msg_err_occurred">خطایی رخ داده است.</string>
     <string name="ingredient_detail">%3$s ازx %2$s %1$.1f</string> <!-- TODO AOR از -->
     <string name="default_video_thumbnail_desc">تصویر بند انگشتی پیش فرض، برای زمانی که هیچ ویدئویی یا تصویر کوچک در دسترس نیست.</string>
+
+    // Video Player error messages ...
+    <string name="msg_err_querying_decoders">قادر به درخواست رمزگشایی دستگاه نیست</string>
+    <string name="msg_err_no_decoder">این دستگاه رمزگشایی را ارائه نمی دهد <xliff:g id="mime_type">%1$s</xliff:g></string>
+    <string name="msg_err_no_secure_decoder">این دستگاه رمزگشایی امن را ارائه نمی دهد <xliff:g id="mime_type">%1$s</xliff:g></string>
+    <string name="msg_err_instantiate_decoder">قادر به ایجاد رمزگشایی نیست <xliff:g id="decoder_name">%1$s</xliff:g></string>
+
+    <string name="notify_channel_name">زمان پخت و پز کانال هشدار از طریق</string>
+    <string name="notify_channel_desc">کانال اعلان که توسط برنامه زمان پخت استفاده می شود</string>
+
 </resources>

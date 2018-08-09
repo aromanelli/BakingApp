@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name">Baking Time</string>
     <string name="msg_retrieving_data">Getting Information</string>
     <string name="msg_offline">Offline</string>
@@ -22,4 +22,14 @@
     <string name="msg_err_occurred">An error has occurred.</string>
     <string name="ingredient_detail">%1$.1f %2$s of %3$s</string>
     <string name="default_video_thumbnail_desc">Default thumbnail image, for when there is no video or thumbnail image available.</string>
+
+    // Video Player error messages ...
+    <string name="msg_err_querying_decoders">Unable to query device decoders.</string>
+    <string name="msg_err_no_decoder">This device does not provide a decoder for <xliff:g id="mime_type">%1$s</xliff:g></string>
+    <string name="msg_err_no_secure_decoder">This device does not provide a secure decoder for <xliff:g id="mime_type">%1$s</xliff:g></string>
+    <string name="msg_err_instantiate_decoder">Unable to instantiate decoder <xliff:g id="decoder_name">%1$s</xliff:g></string>
+
+    <string name="notify_channel_name">Baking Time Notification Channel</string>
+    <string name="notify_channel_desc">The notification channel that is used by the Baking Time app</string>
+
 </resources>

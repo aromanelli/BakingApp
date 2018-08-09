@@ -28,7 +28,6 @@ public class MainActivity
 
     final static public String KEY_BUNDLE_RV_ITEM_POS = "key_bundle_recyclerview_item_position";
     final static public String KEY_STEP_DATA = "key_step_data";
-    final static public String KEY_INDEX_STEP_DATA = "key_index_step_data";
 
     private RecyclerView mViewRecipes;
 

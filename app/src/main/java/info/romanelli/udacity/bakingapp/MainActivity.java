@@ -1,11 +1,18 @@
 package info.romanelli.udacity.bakingapp;
 
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -26,9 +33,11 @@ public class MainActivity
 
     final static private String TAG = MainActivity.class.getSimpleName();
 
-    final static public String KEY_BUNDLE_RV_ITEM_POS = "key_bundle_recyclerview_item_position";
-    final static public String KEY_STEP_DATA = "key_step_data";
-    final static public String KEY_STEP_DATA_ID = "key_index_step_data";
+    public static final String KEY_BUNDLE_RV_ITEM_POS = "key_bundle_recyclerview_item_position";
+    public static final String KEY_STEP_DATA = "key_step_data";
+    public static final String KEY_STEP_DATA_ID = "key_index_step_data";
+
+    public static final String CHANNEL_ID = "Video Player Notifications";
 
     private RecyclerView mViewRecipes;
 
@@ -84,6 +93,39 @@ public class MainActivity
             );
         }
 
+        // According to docs, safe to recreate same channel more than once
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createNotificationChannel();
+        }
+
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private void createNotificationChannel() {
+        // https://developer.android.com/training/notify-user/channels
+        NotificationChannel notifyChannel = new NotificationChannel(
+                CHANNEL_ID,
+                // The user-visible name of the channel ...
+                getString(R.string.notify_channel_name),
+                NotificationManager.IMPORTANCE_LOW
+        );
+        // The user-visible description of the channel ...
+        notifyChannel.setDescription(
+                getString(R.string.notify_channel_desc)
+        );
+        notifyChannel.setShowBadge(false);
+        notifyChannel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+
+        getNotificationManager().createNotificationChannel(notifyChannel);
+    }
+
+    @NonNull
+    private NotificationManager getNotificationManager() {
+        NotificationManager notifyMgr =
+                (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+        if (notifyMgr == null)
+            throw new IllegalStateException("Expected a non-null NotificationManager reference!");
+        return notifyMgr;
     }
 
     @Override

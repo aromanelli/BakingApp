@@ -1,20 +1,14 @@
 package info.romanelli.udacity.bakingapp;
 
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.util.Pair;
@@ -76,7 +70,6 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
 
     private static final String TAG = RecipeInfoStepFragment.class.getSimpleName();
 
-    private static final String CHANNEL_ID = "Video Player Notifications";
     private static final String MEDIA_IMAGE_NOT_VIDEO = "IMAGE_MEDIA";
 
     // Saved instance state keys.
@@ -150,11 +143,6 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
                     .getRecipeData().getName();
             mNotifyText = mStepData.getShortDescription();
 
-        }
-
-        // According to docs, safe to recreate same channel more than once
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            createNotificationChannel();
         }
 
         // Important to register after we're ready to do stuff, as RecipeInfoFragmentsPagerAdapter
@@ -298,15 +286,15 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
 
                 mPlayerNotificationAdapter = new PlayerNotificationAdapter(mPlayer);
                 PlayerNotificationManager pnm = new PlayerNotificationManager(
-                        getContext(),
-                        CHANNEL_ID,
+                        getContext().getApplicationContext(),
+                        MainActivity.CHANNEL_ID,
                         0, // Want just one notification // mStepDataId,
                         mPlayerNotificationAdapter
                 );
                 mPlayerNotificationAdapter.setPlayerNotificationManager(pnm);
 
                 pnm.setOngoing(true);
-//                pnm.setUseNavigationActions(false);
+                // pnm.setUseNavigationActions(false);
                 pnm.setFastForwardIncrementMs(0); // Remove FF
                 pnm.setStopAction(null); // Remove Stop
                 pnm.setRewindIncrementMs(0);
@@ -559,33 +547,6 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
         }
         Log.i(TAG, "getURLToUse: ["+ url +"]");
         return url;
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private void createNotificationChannel() {
-        // https://developer.android.com/training/notify-user/channels
-        NotificationChannel mChannel = new NotificationChannel(
-                CHANNEL_ID,
-                // The user-visible name of the channel ...
-                getString(R.string.notify_channel_name),
-                NotificationManager.IMPORTANCE_LOW
-        );
-        // The user-visible description of the channel ...
-        mChannel.setDescription(
-                getString(R.string.notify_channel_desc)
-        );
-        mChannel.setShowBadge(false);
-        mChannel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-
-        getNotificationManager().createNotificationChannel(mChannel);
-    }
-
-    private NotificationManager getNotificationManager() {
-        if (getContext() == null) throw new IllegalStateException("Expected a non-null Context reference!");
-        NotificationManager notifyMgr = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
-        if (notifyMgr == null)
-            throw new IllegalStateException("Expected a non-null NotificationManager reference!");
-        return notifyMgr;
     }
 
     // https://medium.com/google-exoplayer/playback-notifications-with-exoplayer-a2f1a18cf93b

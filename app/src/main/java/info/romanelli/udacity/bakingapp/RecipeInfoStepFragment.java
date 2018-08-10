@@ -77,6 +77,7 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
     private static final String TAG = RecipeInfoStepFragment.class.getSimpleName();
 
     private static final String CHANNEL_ID = "Video Player Notifications";
+    private static final String MEDIA_IMAGE_NOT_VIDEO = "IMAGE_MEDIA";
 
     // Saved instance state keys.
     private static final String KEY_TRACK_SELECTOR_PARAMETERS = "track_selector_parameters";
@@ -87,7 +88,7 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
 
     private StepData mStepData;
     private int mStepDataId;
-    
+
     private String mMediaURL;
     private String mNotifyTitle;
     private String mNotifyText;
@@ -168,14 +169,16 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
                              ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View rootView = inflater.inflate(R.layout.recipeinfo_step_content, container, false);
-
-        createVideoView(rootView);
-
-        // Display the recipe step information ...
-        TextView tvStepDesc = rootView.findViewById(R.id.recipeinfo_step_description);
-        if (tvStepDesc != null) {
-            tvStepDesc.setText(mStepData.getDescription());
+        View rootView;
+        String url = getURLToUse();
+        if (AppUtil.isEmpty(url) || MEDIA_IMAGE_NOT_VIDEO.equals(url)) {
+            rootView = inflater.inflate(R.layout.recipeinfo_step_content_image, container, false);
+            createImageView(rootView, url);
+            createTextView(rootView);
+        } else {
+            rootView = inflater.inflate(R.layout.recipeinfo_step_content_video, container, false);
+            createVideoView(rootView, url);
+            createTextView(rootView);
         }
 
         if (savedInstanceState != null) {
@@ -247,14 +250,14 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
             if (mStepData.equals(event.getStepData())) {
                 StepDataEvent stickyEvent = EventBus.getDefault().getStickyEvent(StepDataEvent.class);
                 // Better check that an event was actually posted before
-                if(event.equals(stickyEvent)) {
+                if (event.equals(stickyEvent)) {
                     // "Consume" the sticky event
                     EventBus.getDefault().removeStickyEvent(stickyEvent);
                 }
                 mCurrentPage = true;
             } else {
                 mCurrentPage = false;
-                Log.d(TAG, "eventStepData: CLEARING notification for StepData id ["+ mStepDataId +"]");
+                Log.d(TAG, "eventStepData: CLEARING notification for StepData id [" + mStepDataId + "]");
                 if (mPlayer != null) {
                     mPlayer.setPlayWhenReady(false);
                 }
@@ -311,10 +314,11 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
                 // Below does a "pnm.setPlayer(mPlayer)" call ...
                 mPlayerNotificationAdapter.setNotificationState();
 
-                mPlayer.addListener( new PlayerEventListener() );
+                mPlayer.addListener(new PlayerEventListener());
 
                 mPlayer.setPlayWhenReady(mStartAutoPlay);
                 mPlayerView.setPlayer(mPlayer);
+                mPlayerView.setErrorMessageProvider(new PlayerErrorMessageProvider());
                 mPlayerView.setPlaybackPreparer(this);
 
                 // Prepare the MediaSource.
@@ -324,7 +328,8 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
                 );
 
                 Log.d(TAG, "initializePlayer: mMediaURL: [" + mMediaURL + "]");
-                if (getContext() == null) throw new IllegalStateException("Expected a non-null Context reference!");
+                if (getContext() == null)
+                    throw new IllegalStateException("Expected a non-null Context reference!");
                 mMediaSource =
                         new ExtractorMediaSource.Factory(
                                 new DefaultDataSourceFactory(getContext(), userAgent)
@@ -411,7 +416,7 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
 
         @Override
         public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-            Log.d(TAG, "onPlayerStateChanged() called with: playWhenReady = [" + playWhenReady + "]/["+ mPlayer.getPlaybackState() +"], playbackState = [" + playbackState + "]["+ mPlayer.getPlayWhenReady() +"]");
+            Log.d(TAG, "onPlayerStateChanged() called with: playWhenReady = [" + playWhenReady + "]/[" + mPlayer.getPlaybackState() + "], playbackState = [" + playbackState + "][" + mPlayer.getPlayWhenReady() + "]");
             setVideoPlayerNotificationState();
         }
 
@@ -482,45 +487,54 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
     ////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////
 
-    private void createVideoView(@NonNull final View rootView) {
-
-        String url = getURLToUse();
-
-        // If we have a video to show, show it ...
-        final ImageView ivThumbnail = rootView.findViewById(R.id.recipeinfo_step_video_thumbnail);
-        mPlayerView = rootView.findViewById(R.id.recipeinfo_step_video_player);
-        if ((! AppUtil.isEmpty(url)) && (! "IMAGE_MEDIA".equals(url))) {
-            ivThumbnail.setVisibility(View.GONE);
-            mPlayerView.setErrorMessageProvider(new PlayerErrorMessageProvider());
-        } else {
-            // Hide play video player ...
-            mPlayerView.setVisibility(View.GONE);
-            // If we have an image url, display it instead of the default/placeholder image ...
-            if ("IMAGE_MEDIA".equals(url)) { // Legit url to an image, not null, etc.
-                url = null;
-                Picasso.get()
-                        .load(mStepData.getURLThumbnail())
-                        .placeholder(R.drawable.ic_baseline_fastfood_24px)
-                        .into(
-                                ivThumbnail,
-                                new com.squareup.picasso.Callback() {
-                                    @Override
-                                    public void onSuccess() {
-                                        Log.d(TAG, "Picasso:onSuccess: image fetched");
-                                    }
-                                    @Override
-                                    public void onError(Exception e) {
-                                        Log.e(TAG, "Picasso:onError: ", e);
-                                        ivThumbnail.setImageResource(R.drawable.ic_baseline_fastfood_24px);
-                                    }
-                                }
-                        );
-            }
+    private void createTextView(@NonNull final View rootView) {
+        // Display the recipe step information ...
+        TextView tvStepDesc = rootView.findViewById(R.id.recipeinfo_step_description);
+        if (tvStepDesc != null) {
+            tvStepDesc.setText(mStepData.getDescription());
         }
+    }
+
+    private void createImageView(@NonNull final View rootView, String url) {
+
+        final ImageView ivThumbnail = rootView.findViewById(R.id.recipeinfo_step_video_thumbnail);
+
+        if (AppUtil.isEmpty(url)) {
+            ivThumbnail.setImageResource(R.drawable.ic_baseline_fastfood_24px);
+        } else {
+            Picasso.get()
+                    .load(mStepData.getURLThumbnail())
+                    .placeholder(R.drawable.ic_baseline_fastfood_24px)
+                    .into(
+                            ivThumbnail,
+                            new com.squareup.picasso.Callback() {
+                                @Override
+                                public void onSuccess() {
+                                    Log.d(TAG, "Picasso:onSuccess: image fetched");
+                                }
+
+                                @Override
+                                public void onError(Exception e) {
+                                    Log.e(TAG, "Picasso:onError: ", e);
+                                    ivThumbnail.setImageResource(R.drawable.ic_baseline_fastfood_24px);
+                                }
+                            }
+                    );
+        }
+        mMediaURL = null;
+    }
+
+    private void createVideoView(@NonNull final View rootView, String url) {
+        // If we have a video to show, show it ...
+        mPlayerView = rootView.findViewById(R.id.recipeinfo_step_video_player);
         mMediaURL = url;
     }
 
-    private String getURLToUse() {
+    /**
+     * @return A valid {@link String} representation of a {@link java.net.URL}, or the
+     * {@link String} "{@code IMAGE_MEDIA}", if the {@link java.net.URL} is not valid.
+     */
+    String getURLToUse() {
         // Check video URL first, if empty, try thumbnail URL,
         // if empty, null out url so player doesn't show ...
         String url = null; // Null is for using a placeholder image instead
@@ -536,13 +550,14 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
                     url = mStepData.getURLThumbnail();
                 } else if (flagsContentType[2]) { // Image
                     // Thumbnail URL actually points to an Image, not a Video/Audio ...
-                    url = "IMAGE_MEDIA"; // set flag for below code to load thumbnail image
+                    url = MEDIA_IMAGE_NOT_VIDEO; // set flag for below code to load thumbnail image
                 }
             }
         } catch (IOException ioe) {
             Log.e(TAG, "getUrlToUse: Error while determining content types! ["+ mStepData.getURLVideo() +"]["+ mStepData.getURLThumbnail() +"]", ioe);
             url = null;
         }
+        Log.i(TAG, "getURLToUse: ["+ url +"]");
         return url;
     }
 

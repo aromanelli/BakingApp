@@ -534,7 +534,7 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
      * @return A valid {@link String} representation of a {@link java.net.URL}, or the
      * {@link String} "{@code IMAGE_MEDIA}", if the {@link java.net.URL} is not valid.
      */
-    String getURLToUse() {
+    private String getURLToUse() {
         // Check video URL first, if empty, try thumbnail URL,
         // if empty, null out url so player doesn't show ...
         String url = null; // Null is for using a placeholder image instead

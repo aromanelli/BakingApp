@@ -488,7 +488,7 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
 
         // If we have a video to show, show it ...
         final ImageView ivThumbnail = rootView.findViewById(R.id.recipeinfo_step_video_thumbnail);
-        mPlayerView = rootView.findViewById(R.id.recipeinfo_step_video);
+        mPlayerView = rootView.findViewById(R.id.recipeinfo_step_video_player);
         if ((! AppUtil.isEmpty(url)) && (! "IMAGE_MEDIA".equals(url))) {
             ivThumbnail.setVisibility(View.GONE);
             mPlayerView.setErrorMessageProvider(new PlayerErrorMessageProvider());

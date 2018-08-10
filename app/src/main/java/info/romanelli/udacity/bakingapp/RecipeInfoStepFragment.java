@@ -11,6 +11,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
@@ -91,7 +92,7 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
     private String mNotifyTitle;
     private String mNotifyText;
 
-    private PlayerNotificationManager mPlayerNotifyMgr;
+    private PlayerNotificationAdapter mPlayerNotificationAdapter;
 
     private PlayerView mPlayerView;
     private SimpleExoPlayer mPlayer;
@@ -275,6 +276,9 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
 
     private void initializePlayer() {
 
+        if (getContext() == null)
+            throw new IllegalStateException("Expected a non-null getContext() value!");
+
         // Don't init player if there's no media to show it ...
         if (mMediaURL != null) {
 
@@ -289,24 +293,25 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
                         new DefaultLoadControl()
                 );
 
-                mPlayerNotifyMgr = new PlayerNotificationManager(
+                mPlayerNotificationAdapter = new PlayerNotificationAdapter(mPlayer);
+                PlayerNotificationManager pnm = new PlayerNotificationManager(
                         getContext(),
                         CHANNEL_ID,
                         0, // Want just one notification // mStepDataId,
-                        new PlayerNotificationAdapter()
+                        mPlayerNotificationAdapter
                 );
-                mPlayerNotifyMgr.setOngoing(true);
-//                mPlayerNotifyMgr.setUseNavigationActions(false);
-                mPlayerNotifyMgr.setFastForwardIncrementMs(0); // Remove FF
-                mPlayerNotifyMgr.setStopAction(null); // Remove Stop
-                mPlayerNotifyMgr.setRewindIncrementMs(0);
-                if (isCurrentPage()) {
-                    mPlayerNotifyMgr.setPlayer(mPlayer);
-                }
+                mPlayerNotificationAdapter.setPlayerNotificationManager(pnm);
 
-                mPlayer.addListener(
-                        new PlayerEventListener()
-                );
+                pnm.setOngoing(true);
+//                pnm.setUseNavigationActions(false);
+                pnm.setFastForwardIncrementMs(0); // Remove FF
+                pnm.setStopAction(null); // Remove Stop
+                pnm.setRewindIncrementMs(0);
+
+                // Below does a "pnm.setPlayer(mPlayer)" call ...
+                mPlayerNotificationAdapter.setNotificationState();
+
+                mPlayer.addListener( new PlayerEventListener() );
 
                 mPlayer.setPlayWhenReady(mStartAutoPlay);
                 mPlayerView.setPlayer(mPlayer);
@@ -345,8 +350,9 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
         if (mPlayer != null) {
             updateTrackSelectorParameters();
             updateStartPosition();
-            mPlayerNotifyMgr.setPlayer(null);
+            mPlayerNotificationAdapter.setNotificationActive(false);
             mPlayer.release(); // No mPlayer.stop() ?
+            mPlayerNotificationAdapter = null;
             mPlayer = null;
             mMediaSource = null;
             mTrackSelector = null;
@@ -388,15 +394,15 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
     }
 
     private void setVideoPlayerNotificationState() {
-        if ((mPlayer != null) && (mPlayerNotifyMgr != null)) {
+        if (mPlayerNotificationAdapter != null) {
             if (isCurrentPage()) {
                 if (mPlayer.getPlaybackState() == Player.STATE_READY || mPlayer.getPlaybackState() == Player.STATE_ENDED) {
-                    mPlayerNotifyMgr.setPlayer(mPlayer);
+                    mPlayerNotificationAdapter.setNotificationActive(true);
                 } else {
-                    mPlayerNotifyMgr.setPlayer(null);
+                    mPlayerNotificationAdapter.setNotificationActive(false);
                 }
             } else {
-                mPlayerNotifyMgr.setPlayer(null);
+                mPlayerNotificationAdapter.setNotificationActive(false);
             }
         }
     }
@@ -570,12 +576,57 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
     // https://medium.com/google-exoplayer/playback-notifications-with-exoplayer-a2f1a18cf93b
     private class PlayerNotificationAdapter implements MediaDescriptionAdapter {
 
+        private SimpleExoPlayer mAPlayer;
+        private PlayerNotificationManager mAPlayerNotifyMgr;
+
         private Bitmap icon;
 
-        PlayerNotificationAdapter() {
+        PlayerNotificationAdapter(final SimpleExoPlayer player) {
+            if (player == null)
+                throw new IllegalArgumentException("Expected a non-null SimpleExoPlayer reference!");
+            mAPlayer = player;
+            if (getContext() == null)
+                throw new IllegalStateException("Expected a non-null getContext().getResources() value!");
             icon = BitmapFactory.decodeResource(
                     getContext().getResources(),
                     R.drawable.ic_baseline_fastfood_24px
+            );
+        }
+
+        void setPlayerNotificationManager(
+                final PlayerNotificationManager playerNotifyMgr) {
+            if (playerNotifyMgr == null)
+                throw new IllegalArgumentException("Expected a non-null PlayerNotificationManager reference!");
+            this.mAPlayerNotifyMgr = playerNotifyMgr;
+        }
+
+        /**
+         * <p>Will call {@link #setNotificationActive(boolean)},
+         * passing in the {@link #isCurrentPage()} result.</p>
+         */
+        void setNotificationState() {
+            setNotificationActive( isCurrentPage() );
+        }
+
+        /**
+         * <p>Will call {@link PlayerNotificationManager#setPlayer(Player)}, to tell it
+         * whether it should show/hide any notifications for the {@link SimpleExoPlayer}
+         * that it manages.</p>
+         * @param active Whether the {@link PlayerNotificationManager} should be showing
+         *               any notifications, or not.
+         */
+        void setNotificationActive(final boolean active) {
+            if (mAPlayerNotifyMgr == null)
+                throw new IllegalArgumentException("Expected a non-null PlayerNotificationManager reference!");
+            // Delaying because of https://github.com/google/ExoPlayer/issues/4238
+            new Handler().postDelayed(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            mAPlayerNotifyMgr.setPlayer(active ? mAPlayer : null);
+                        }
+                    },
+                    500
             );
         }
 

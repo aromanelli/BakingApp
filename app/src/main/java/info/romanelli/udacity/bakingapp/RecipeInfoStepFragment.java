@@ -284,11 +284,14 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
                         new DefaultLoadControl()
                 );
 
-                mPlayerNotificationAdapter = new PlayerNotificationAdapter(mPlayer);
+                if (mStepDataId == 0)
+                    throw new IllegalStateException("mStepDataId should never be zero! [+ mStepDataId +]");
+                mPlayerNotificationAdapter =
+                        new PlayerNotificationAdapter(mPlayer, mStepDataId, mNotifyTitle, mNotifyText);
                 PlayerNotificationManager pnm = new PlayerNotificationManager(
                         getContext().getApplicationContext(),
                         MainActivity.CHANNEL_ID,
-                        0, // Want just one notification // mStepDataId,
+                        mStepDataId,
                         mPlayerNotificationAdapter
                 );
                 mPlayerNotificationAdapter.setPlayerNotificationManager(pnm);
@@ -552,28 +555,47 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
     // https://medium.com/google-exoplayer/playback-notifications-with-exoplayer-a2f1a18cf93b
     private class PlayerNotificationAdapter implements MediaDescriptionAdapter {
 
-        private SimpleExoPlayer mAPlayer;
-        private PlayerNotificationManager mAPlayerNotifyMgr;
+        private SimpleExoPlayer aPlayer;
+        private PlayerNotificationManager aPlayerNotifyMgr;
+
+        private int aStepDataId;
+        private String aNotifyTitle;
+        private String aNotifyText;
 
         private Bitmap icon;
 
-        PlayerNotificationAdapter(final SimpleExoPlayer player) {
+        PlayerNotificationAdapter(final SimpleExoPlayer player, final int idStepData, final String title, final String text) {
+
             if (player == null)
                 throw new IllegalArgumentException("Expected a non-null SimpleExoPlayer reference!");
-            mAPlayer = player;
+            aPlayer = player;
+
+            if (idStepData <= 0)
+                throw new IllegalArgumentException("Expected a valid StepData id value! ["+ idStepData +"]");
+            aStepDataId = idStepData;
+
+            if (title == null)
+                throw new IllegalArgumentException("Expected a non-null title reference!");
+            aNotifyTitle = title;
+
+            if (text == null)
+                throw new IllegalArgumentException("Expected a non-null text reference!");
+            aNotifyText = text;
+
             if (getContext() == null)
-                throw new IllegalStateException("Expected a non-null getContext().getResources() value!");
+                throw new IllegalStateException("Expected a non-null getResources() value!");
             icon = BitmapFactory.decodeResource(
                     getContext().getResources(),
                     R.drawable.ic_baseline_fastfood_24px
             );
+
         }
 
         void setPlayerNotificationManager(
                 final PlayerNotificationManager playerNotifyMgr) {
             if (playerNotifyMgr == null)
                 throw new IllegalArgumentException("Expected a non-null PlayerNotificationManager reference!");
-            this.mAPlayerNotifyMgr = playerNotifyMgr;
+            this.aPlayerNotifyMgr = playerNotifyMgr;
         }
 
         /**
@@ -592,14 +614,14 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
          *               any notifications, or not.
          */
         void setNotificationActive(final boolean active) {
-            if (mAPlayerNotifyMgr == null)
+            if (aPlayerNotifyMgr == null)
                 throw new IllegalArgumentException("Expected a non-null PlayerNotificationManager reference!");
             // Delaying because of https://github.com/google/ExoPlayer/issues/4238
             new Handler().postDelayed(
                     new Runnable() {
                         @Override
                         public void run() {
-                            mAPlayerNotifyMgr.setPlayer(active ? mAPlayer : null);
+                            aPlayerNotifyMgr.setPlayer(active ? aPlayer : null);
                         }
                     },
                     500
@@ -608,13 +630,13 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
 
         @Override
         public String getCurrentContentTitle(Player player) {
-            return mNotifyTitle + " " + mStepDataId;
+            return aNotifyTitle + " " + aStepDataId;
         }
 
         @Nullable
         @Override
         public String getCurrentContentText(Player player) {
-            return mNotifyText;
+            return aNotifyText;
         }
 
         @Nullable

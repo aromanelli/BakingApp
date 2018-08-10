@@ -11,6 +11,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 
+import info.romanelli.udacity.bakingapp.data.StepData;
+import info.romanelli.udacity.bakingapp.event.StepDataEvent;
+
 /**
  * An activity representing a list of RecipeInfos. This activity
  * has different presentations for handset and tablet-size devices. On
@@ -19,13 +22,14 @@ import android.view.View;
  * item details. On tablets, the activity presents the list of items and
  * item details side-by-side using two vertical panes.
  */
-public class RecipeInfoActivity extends AppCompatActivity {
+public class RecipeInfoActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener {
 
     final static private String TAG = RecipeInfoStepActivity.class.getSimpleName();
 
     private boolean mTwoPane;
 
     private ViewPager mPager;
+    private RecipeInfoFragmentsPagerAdapter mPagerAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,17 +71,16 @@ public class RecipeInfoActivity extends AppCompatActivity {
         // (https://developer.android.com/training/animation/screen-slide)
         mPager = findViewById(R.id.pager);
         if (mPager != null) { // Only our 'two pane' tablet view has a pager, phone view does not!
-            mPager.setAdapter(
-                    new RecipeInfoFragmentsPagerAdapter(
-                            getSupportFragmentManager(), this, mTwoPane)
-            );
+            mPagerAdapter = new RecipeInfoFragmentsPagerAdapter(
+                    getSupportFragmentManager(), this, mTwoPane); // mTwoPane, not false!
+            mPager.setAdapter(mPagerAdapter);
             // mPager.setOffscreenPageLimit(mPagerAdapter.getCount());
+            mPager.addOnPageChangeListener(this);
         }
 
     }
 
     protected void setCurrentPage(final int index) {
-        // TODO AOR https://developer.android.com/training/basics/fragments/communicating#DefineInterface
         mPager.setCurrentItem(index);
     }
 
@@ -114,6 +117,40 @@ public class RecipeInfoActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (mPager != null) {
+            mPager.removeOnPageChangeListener(this);
+        }
+        super.onDestroy();
+    }
+
+    @Override
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+    }
+
+    @Override
+    public void onPageSelected(int position) {
+        final StepData stepData;
+        if (position == 0) {
+            stepData = null; // Ingredients chosen
+        } else {
+            stepData = ViewModelProviders.of(this).get(DataViewModel.class)
+                    .getRecipeData().getSteps().get((position - 1));
+        }
+
+        ViewModelProviders.of(this).get(DataViewModel.class)
+                .setStepData(stepData);
+
+        mPagerAdapter.postEvent( // (See RecipeInfoStepActivity)
+                new StepDataEvent(StepDataEvent.Type.SELECTED, position, stepData)
+        );
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int state) {
     }
 
 }

@@ -5,19 +5,16 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.media.session.MediaButtonReceiver;
-import android.support.v4.media.session.MediaSessionCompat;
-import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -43,16 +40,22 @@ import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
-import com.google.android.exoplayer2.ui.PlayerControlView;
+import com.google.android.exoplayer2.ui.PlayerNotificationManager;
+import com.google.android.exoplayer2.ui.PlayerNotificationManager.MediaDescriptionAdapter;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.ErrorMessageProvider;
 import com.google.android.exoplayer2.util.Util;
 import com.squareup.picasso.Picasso;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import java.io.IOException;
 
 import info.romanelli.udacity.bakingapp.data.StepData;
+import info.romanelli.udacity.bakingapp.event.StepDataEvent;
 
 /**
  * A fragment representing a single RecipeInfo detail screen.
@@ -61,12 +64,12 @@ import info.romanelli.udacity.bakingapp.data.StepData;
  * in two-pane mode (on tablets), or a {@link RecipeInfoStepActivity}
  * on handsets.
  */
-public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer, PlayerControlView.VisibilityListener {
+public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer {
 
     // REVIEWER: Parts of the code below was re-purposed from ...
-    // https://github.com/google/ExoPlayer/blob/release-v2/demos/main/src/main/java/com/google/android/exoplayer2/demo/PlayerActivity.java
-    //    ... and ...
-    // AdvancedAndroid_ClassicalMusicQuiz:origin/TMED.06-Solution-AddMediaButtonReceiver
+    //   https://github.com/google/ExoPlayer/blob/release-v2/demos/main/src/main/java/com/google/android/exoplayer2/demo/PlayerActivity.java
+    //   AdvancedAndroid_ClassicalMusicQuiz:origin/TMED.06-Solution-AddMediaButtonReceiver
+    //   https://medium.com/google-exoplayer/playback-notifications-with-exoplayer-a2f1a18cf93b
     // ... as they are boiler-plate type of code, and I have been struggling with
     // getting the lifecycle of ExoPlayers's in Fragments with ViewPagers to work correctly.
 
@@ -79,25 +82,27 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
     private static final String KEY_WINDOW = "window";
     private static final String KEY_POSITION = "position";
     private static final String KEY_AUTO_PLAY = "auto_play";
-
-    static private MediaSessionCompat MEDIA_SESSION;
-    static private PlaybackStateCompat.Builder PLAYBACK_STATE_BUILDER;
+    private static final String KEY_CURRENT_PAGE = "frag_current_page";
 
     private StepData mStepData;
+    private int mStepDataId;
+    
+    private String mMediaURL;
+    private String mNotifyTitle;
+    private String mNotifyText;
 
-    private String mediaURL;
-    private String notifyTitle;
-    private String notifyText;
-    private NotificationManager notifyMgr;
+    private PlayerNotificationManager mPlayerNotifyMgr;
 
-    private PlayerView playerView;
-    private SimpleExoPlayer player;
-    private MediaSource mediaSource;
-    private DefaultTrackSelector trackSelector;
-    private DefaultTrackSelector.Parameters trackSelectorParameters;
-    private boolean startAutoPlay;
-    private int startWindow;
-    private long startPosition;
+    private PlayerView mPlayerView;
+    private SimpleExoPlayer mPlayer;
+    private MediaSource mMediaSource;
+    private DefaultTrackSelector mTrackSelector;
+    private DefaultTrackSelector.Parameters mTrackSelectorParameters;
+    private boolean mStartAutoPlay;
+    private int mStartWindow;
+    private long mStartPosition;
+
+    private boolean mCurrentPage = false;
 
     /**
      * Mandatory empty constructor for the fragment manager to
@@ -134,12 +139,27 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
             if (mStepData == null)
                 throw new IllegalStateException("Expected a " + StepData.class.getSimpleName() + " reference!");
 
-            notifyTitle =
-                    ViewModelProviders.of(getActivity()).get(DataViewModel.class).getRecipeData().getName();
-            notifyText = mStepData.getShortDescription();
+            mStepDataId = getArguments().getInt(MainActivity.KEY_STEP_DATA_ID);
+            if (mStepDataId <= 0) // Step ID is Step List Index + 1
+                throw new IllegalStateException("Expected a StepData identifier value!");
+            Log.d(TAG, "onCreate: mStepDataId: " + mStepDataId);
+
+            mNotifyTitle = ViewModelProviders.of(getActivity()).get(DataViewModel.class)
+                    .getRecipeData().getName();
+            mNotifyText = mStepData.getShortDescription();
 
         }
 
+        // According to docs, safe to recreate same channel more than once
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createNotificationChannel();
+        }
+
+        // Important to register after we're ready to do stuff, as RecipeInfoFragmentsPagerAdapter
+        // uses the postSticky, which means the event annotated method gets called IMMEDIATELY
+        // when the register (below) gets called.  If the fragment is newly instantiated, but not
+        // had its onCreate called yet, then member vars are null when the event method is called.
+        EventBus.getDefault().register(this);
     }
 
     @Override
@@ -158,27 +178,21 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
         }
 
         if (savedInstanceState != null) {
-            trackSelectorParameters = savedInstanceState.getParcelable(KEY_TRACK_SELECTOR_PARAMETERS);
-            startAutoPlay = savedInstanceState.getBoolean(KEY_AUTO_PLAY);
-            startWindow = savedInstanceState.getInt(KEY_WINDOW);
-            startPosition = savedInstanceState.getLong(KEY_POSITION);
+            mTrackSelectorParameters = savedInstanceState.getParcelable(KEY_TRACK_SELECTOR_PARAMETERS);
+            mStartAutoPlay = savedInstanceState.getBoolean(KEY_AUTO_PLAY);
+            mStartWindow = savedInstanceState.getInt(KEY_WINDOW);
+            mStartPosition = savedInstanceState.getLong(KEY_POSITION);
+            mCurrentPage = savedInstanceState.getBoolean(KEY_CURRENT_PAGE);
         } else {
-            trackSelectorParameters = new DefaultTrackSelector.ParametersBuilder().build();
+            mTrackSelectorParameters = new DefaultTrackSelector.ParametersBuilder().build();
             clearStartPosition();
         }
 
         return rootView;
     }
 
-//    @Override
-//    public void onNewIntent(Intent intent) {
-//        releasePlayer();
-//        clearStartPosition();
-//        setIntent(intent);
-//    }
-
     @Override
-    public void onStart() { // Called when the Fragment is visible to the user.
+    public void onStart() {
         super.onStart();
         if (Util.SDK_INT > 23) {
             initializePlayer();
@@ -186,9 +200,9 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
     }
 
     @Override
-    public void onResume() { // Called when the fragment is visible to the user and actively running.
+    public void onResume() {
         super.onResume();
-        if (Util.SDK_INT <= 23 || player == null) {
+        if (Util.SDK_INT <= 23 || mPlayer == null) {
             initializePlayer();
         }
     }
@@ -204,34 +218,10 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
     @Override
     public void onStop() { // Shutdown2
         super.onStop();
+        EventBus.getDefault().unregister(this); // Registered in RecipeInfoFragmentsPagerAdapter
         if (Util.SDK_INT > 23) {
             releasePlayer();
         }
-    }
-
-    @Override
-    public void onDestroyView() { // Shutdown3
-        super.onDestroyView();
-    }
-
-    @Override
-    public void onDestroy() { // Shutdown4
-        super.onDestroy();
-
-        // TODO AOR When to clean up the media session to not lead? Its static, all frags use it. In parent activity?
-//        // More than one frag can be destroyed at once, or
-//        // going from step fragment to ingredients fragment
-//        if (MEDIA_SESSION != null) {
-//            MEDIA_SESSION.setActive(false);
-//            MEDIA_SESSION = null;
-//            Log.d(TAG, "onDestroy: MEDIA_SESSION has been nulled.");
-//        }
-
-    }
-
-    @Override
-    public void onDetach() { // Shutdown5
-        super.onDetach();
     }
 
     @Override
@@ -240,10 +230,42 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
 
         updateTrackSelectorParameters();
         updateStartPosition();
-        outState.putParcelable(KEY_TRACK_SELECTOR_PARAMETERS, trackSelectorParameters);
-        outState.putBoolean(KEY_AUTO_PLAY, startAutoPlay);
-        outState.putInt(KEY_WINDOW, startWindow);
-        outState.putLong(KEY_POSITION, startPosition);
+        outState.putParcelable(KEY_TRACK_SELECTOR_PARAMETERS, mTrackSelectorParameters);
+        outState.putBoolean(KEY_AUTO_PLAY, mStartAutoPlay);
+        outState.putInt(KEY_WINDOW, mStartWindow);
+        outState.putLong(KEY_POSITION, mStartPosition);
+
+        outState.putBoolean(KEY_CURRENT_PAGE, mCurrentPage);
+    }
+
+    @SuppressWarnings("unused")
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    public void eventStepData(StepDataEvent event) {
+        Log.d(TAG, "eventStepData() called with: event = [" + event + "]");
+        if (event.getType().equals(StepDataEvent.Type.SELECTED)) {
+            if (mStepData.equals(event.getStepData())) {
+                StepDataEvent stickyEvent = EventBus.getDefault().getStickyEvent(StepDataEvent.class);
+                // Better check that an event was actually posted before
+                if(event.equals(stickyEvent)) {
+                    // "Consume" the sticky event
+                    EventBus.getDefault().removeStickyEvent(stickyEvent);
+                }
+                mCurrentPage = true;
+            } else {
+                mCurrentPage = false;
+                Log.d(TAG, "eventStepData: CLEARING notification for StepData id ["+ mStepDataId +"]");
+                if (mPlayer != null) {
+                    mPlayer.setPlayWhenReady(false);
+                }
+            }
+            Log.d(TAG, "eventStepData: mCurrentPage: " + mCurrentPage + " || " + event);
+            setVideoPlayerNotificationState();
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public boolean isCurrentPage() {
+        return mCurrentPage;
     }
 
     @Override
@@ -251,35 +273,44 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
         initializePlayer();
     }
 
-    @Override
-    public void onVisibilityChange(int visibility) {
-
-    }
-
     private void initializePlayer() {
 
-        // Even though media session is static var, this must happen
-        // each time, as it also assign non-static member vars!
-        initMediaSession();
-
         // Don't init player if there's no media to show it ...
-        if (mediaURL != null) {
+        if (mMediaURL != null) {
 
-            if (player == null) {
+            if (mPlayer == null) {
 
-                trackSelector = new DefaultTrackSelector();
-                trackSelector.setParameters(trackSelectorParameters);
+                mTrackSelector = new DefaultTrackSelector();
+                mTrackSelector.setParameters(mTrackSelectorParameters);
 
-                player = ExoPlayerFactory.newSimpleInstance(
+                mPlayer = ExoPlayerFactory.newSimpleInstance(
                         new DefaultRenderersFactory(getContext()),
-                        trackSelector,
+                        mTrackSelector,
                         new DefaultLoadControl()
                 );
 
-                player.addListener(new PlayerEventListener());
-                player.setPlayWhenReady(startAutoPlay);
-                playerView.setPlayer(player);
-                playerView.setPlaybackPreparer(this);
+                mPlayerNotifyMgr = new PlayerNotificationManager(
+                        getContext(),
+                        CHANNEL_ID,
+                        0, // Want just one notification // mStepDataId,
+                        new PlayerNotificationAdapter()
+                );
+                mPlayerNotifyMgr.setOngoing(true);
+//                mPlayerNotifyMgr.setUseNavigationActions(false);
+                mPlayerNotifyMgr.setFastForwardIncrementMs(0); // Remove FF
+                mPlayerNotifyMgr.setStopAction(null); // Remove Stop
+                mPlayerNotifyMgr.setRewindIncrementMs(0);
+                if (isCurrentPage()) {
+                    mPlayerNotifyMgr.setPlayer(mPlayer);
+                }
+
+                mPlayer.addListener(
+                        new PlayerEventListener()
+                );
+
+                mPlayer.setPlayWhenReady(mStartAutoPlay);
+                mPlayerView.setPlayer(mPlayer);
+                mPlayerView.setPlaybackPreparer(this);
 
                 // Prepare the MediaSource.
                 String userAgent = Util.getUserAgent(
@@ -287,56 +318,59 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
                         "RecipeInfo_" + RecipeInfoStepFragment.class.getSimpleName()
                 );
 
-                Log.d(TAG, "initializePlayer: mediaURL: [" + mediaURL + "]");
+                Log.d(TAG, "initializePlayer: mMediaURL: [" + mMediaURL + "]");
                 if (getContext() == null) throw new IllegalStateException("Expected a non-null Context reference!");
-                mediaSource = new ExtractorMediaSource.Factory(
-                        new DefaultDataSourceFactory(getContext(), userAgent)
-                )
-                        .setExtractorsFactory(
+                mMediaSource =
+                        new ExtractorMediaSource.Factory(
+                                new DefaultDataSourceFactory(getContext(), userAgent)
+                        ).setExtractorsFactory(
                                 new DefaultExtractorsFactory()
-                        )
-                        .createMediaSource(Uri.parse(mediaURL));
+                        ).createMediaSource(
+                                Uri.parse(mMediaURL)
+                        );
+
 
             }
 
-            boolean haveStartPosition = startWindow != C.INDEX_UNSET;
+            boolean haveStartPosition = mStartWindow != C.INDEX_UNSET;
             if (haveStartPosition) {
-                player.seekTo(startWindow, startPosition);
+                mPlayer.seekTo(mStartWindow, mStartPosition);
             }
-            player.prepare(mediaSource, !haveStartPosition, false);
+            mPlayer.prepare(mMediaSource, !haveStartPosition, false);
         }
 
     }
 
     private void releasePlayer() {
-        if (player != null) {
+        if (mPlayer != null) {
             updateTrackSelectorParameters();
             updateStartPosition();
-            player.release(); // No player.stop() ?
-            player = null;
-            mediaSource = null;
-            trackSelector = null;
+            mPlayerNotifyMgr.setPlayer(null);
+            mPlayer.release(); // No mPlayer.stop() ?
+            mPlayer = null;
+            mMediaSource = null;
+            mTrackSelector = null;
         }
     }
 
     private void updateTrackSelectorParameters() {
-        if (trackSelector != null) {
-            trackSelectorParameters = trackSelector.getParameters();
+        if (mTrackSelector != null) {
+            mTrackSelectorParameters = mTrackSelector.getParameters();
         }
     }
 
     private void updateStartPosition() {
-        if (player != null) {
-            startAutoPlay = player.getPlayWhenReady();
-            startWindow = player.getCurrentWindowIndex();
-            startPosition = Math.max(0, player.getContentPosition());
+        if (mPlayer != null) {
+            mStartAutoPlay = mPlayer.getPlayWhenReady();
+            mStartWindow = mPlayer.getCurrentWindowIndex();
+            mStartPosition = Math.max(0, mPlayer.getContentPosition());
         }
     }
 
     private void clearStartPosition() {
-        startAutoPlay = false;
-        startWindow = C.INDEX_UNSET;
-        startPosition = C.TIME_UNSET;
+        mStartAutoPlay = false;
+        mStartWindow = C.INDEX_UNSET;
+        mStartPosition = C.TIME_UNSET;
     }
 
     private static boolean isBehindLiveWindow(ExoPlaybackException e) {
@@ -353,30 +387,31 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
         return false;
     }
 
+    private void setVideoPlayerNotificationState() {
+        if ((mPlayer != null) && (mPlayerNotifyMgr != null)) {
+            if (isCurrentPage()) {
+                if (mPlayer.getPlaybackState() == Player.STATE_READY || mPlayer.getPlaybackState() == Player.STATE_ENDED) {
+                    mPlayerNotifyMgr.setPlayer(mPlayer);
+                } else {
+                    mPlayerNotifyMgr.setPlayer(null);
+                }
+            } else {
+                mPlayerNotifyMgr.setPlayer(null);
+            }
+        }
+    }
+
     private class PlayerEventListener extends Player.DefaultEventListener {
 
         @Override
         public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-            if ((playbackState == Player.STATE_READY) && playWhenReady) {
-                PLAYBACK_STATE_BUILDER.setState(
-                        PlaybackStateCompat.STATE_PLAYING,
-                        player.getCurrentPosition(),
-                        1f
-                );
-            } else if ((playbackState == Player.STATE_READY)) {
-                PLAYBACK_STATE_BUILDER.setState(
-                        PlaybackStateCompat.STATE_PAUSED,
-                        player.getCurrentPosition(),
-                        1f
-                );
-            }
-            MEDIA_SESSION.setPlaybackState(PLAYBACK_STATE_BUILDER.build());
-            showNotification(PLAYBACK_STATE_BUILDER.build());
+            Log.d(TAG, "onPlayerStateChanged() called with: playWhenReady = [" + playWhenReady + "]/["+ mPlayer.getPlaybackState() +"], playbackState = [" + playbackState + "]["+ mPlayer.getPlayWhenReady() +"]");
+            setVideoPlayerNotificationState();
         }
 
         @Override
         public void onPositionDiscontinuity(@Player.DiscontinuityReason int reason) {
-            if (player.getPlaybackError() != null) {
+            if (mPlayer.getPlaybackError() != null) {
                 // The user has performed a seek whilst in the error state. Update the resume position so
                 // that if the user then retries, playback resumes from the position to which they seeked.
                 updateStartPosition();
@@ -446,16 +481,14 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
         String url = getURLToUse();
 
         // If we have a video to show, show it ...
-        playerView = rootView.findViewById(R.id.recipeinfo_step_video);
         final ImageView ivThumbnail = rootView.findViewById(R.id.recipeinfo_step_video_thumbnail);
+        mPlayerView = rootView.findViewById(R.id.recipeinfo_step_video);
         if ((! AppUtil.isEmpty(url)) && (! "IMAGE_MEDIA".equals(url))) {
             ivThumbnail.setVisibility(View.GONE);
-            // initPlayer(...) was called here originally
-            playerView.setControllerVisibilityListener(this);
-            playerView.setErrorMessageProvider(new PlayerErrorMessageProvider());
+            mPlayerView.setErrorMessageProvider(new PlayerErrorMessageProvider());
         } else {
             // Hide play video player ...
-            playerView.setVisibility(View.GONE);
+            mPlayerView.setVisibility(View.GONE);
             // If we have an image url, display it instead of the default/placeholder image ...
             if ("IMAGE_MEDIA".equals(url)) { // Legit url to an image, not null, etc.
                 url = null;
@@ -478,7 +511,7 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
                         );
             }
         }
-        mediaURL = url;
+        mMediaURL = url;
     }
 
     private String getURLToUse() {
@@ -507,121 +540,9 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
         return url;
     }
 
-    /**
-     * Initializes the Media Session to be enabled with media buttons,
-     * transport controls, callbacks and media controller.
-     */
-    private void initMediaSession() {
-        Log.d(TAG, "initMediaSession() called\n\t" + player + "\n\t" + MEDIA_SESSION + "\n\t" + this + "\n\t" + getContext());
-
-        if (MEDIA_SESSION != null) {
-            return;
-        }
-
-        // Create a MediaSessionCompat.
-        if (getContext() == null) throw new IllegalStateException("Expected a non-null Context reference!");
-        MEDIA_SESSION = new MediaSessionCompat(getContext(), TAG);
-
-        // Enable callbacks from MediaButtons and TransportControls.
-        MEDIA_SESSION.setFlags(
-                MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS |
-                        MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
-
-        // Do not let MediaButtons restart the player when the app is not visible.
-        MEDIA_SESSION.setMediaButtonReceiver(null);
-
-        // Set an initial PlaybackState with ACTION_PLAY, so media buttons can start the player.
-        PLAYBACK_STATE_BUILDER = new PlaybackStateCompat.Builder()
-                .setActions(
-                        PlaybackStateCompat.ACTION_PLAY |
-                                PlaybackStateCompat.ACTION_PAUSE |
-                                PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS |
-                                PlaybackStateCompat.ACTION_PLAY_PAUSE);
-
-        MEDIA_SESSION.setPlaybackState(PLAYBACK_STATE_BUILDER.build());
-
-        // MySessionCallback has methods that handle callbacks from a media controller.
-        MEDIA_SESSION.setCallback(new SessionCallback());
-
-        // Start the Media Session since the activity is active.
-        MEDIA_SESSION.setActive(true);
-    }
-
-    /**
-     * Shows Media Style notification, with actions that
-     * depend on the current MediaSession PlaybackState.
-     * @param state The PlaybackState of the MediaSession.
-     */
-    private void showNotification(PlaybackStateCompat state) {
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            createNotificationChannel(); // notifyMgr assigned inside of this method
-        } else {
-            setNotificationManagerRef();
-        }
-
-        if (getContext() == null) throw new IllegalStateException("Expected a non-null Context reference!");
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext(), CHANNEL_ID);
-
-        int icon;
-        String play_pause;
-        if(state.getState() == PlaybackStateCompat.STATE_PLAYING){
-            icon = R.drawable.exo_controls_pause;
-            play_pause = getString(R.string.exo_controls_pause_description);
-        } else {
-            icon = R.drawable.exo_controls_play;
-            play_pause = getString(R.string.exo_controls_play_description);
-        }
-
-        NotificationCompat.Action playPauseAction = new NotificationCompat.Action(
-                icon,
-                play_pause,
-                MediaButtonReceiver.buildMediaButtonPendingIntent(
-                        getContext(),
-                        PlaybackStateCompat.ACTION_PLAY_PAUSE
-                )
-        );
-
-        NotificationCompat.Action restartAction = new android.support.v4.app.NotificationCompat.Action(
-                R.drawable.exo_controls_previous,
-                getString(R.string.exo_controls_previous_description),
-                MediaButtonReceiver.buildMediaButtonPendingIntent(
-                        getContext(),
-                        PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
-                )
-        );
-
-        PendingIntent contentPendingIntent = PendingIntent.getActivity(
-                getContext(), 0, new Intent(getContext(), getContext().getClass()), 0);
-
-        builder.setContentTitle(notifyTitle)
-                .setContentText(notifyText)
-                .setContentIntent(contentPendingIntent)
-                .setSmallIcon(R.drawable.ic_baseline_fastfood_24px)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .addAction(restartAction)
-                .addAction(playPauseAction)
-                .setStyle(
-                        new android.support.v4.media.app.NotificationCompat.MediaStyle()
-                                .setMediaSession(MEDIA_SESSION.getSessionToken())
-                                .setShowActionsInCompactView(0, 1)
-                );
-
-        notifyMgr.notify(0, builder.build());
-    }
-
-    private void setNotificationManagerRef() {
-        if (getContext() == null) throw new IllegalStateException("Expected a non-null Context reference!");
-        notifyMgr = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
-        if (notifyMgr == null)
-            throw new IllegalStateException("Expected a non-null NotificationManager reference!");
-    }
-
     @RequiresApi(Build.VERSION_CODES.O)
     private void createNotificationChannel() {
-
-        setNotificationManagerRef();
-
+        // https://developer.android.com/training/notify-user/channels
         NotificationChannel mChannel = new NotificationChannel(
                 CHANNEL_ID,
                 // The user-visible name of the channel ...
@@ -634,46 +555,56 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
         );
         mChannel.setShowBadge(false);
         mChannel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-        notifyMgr.createNotificationChannel(mChannel);
+
+        getNotificationManager().createNotificationChannel(mChannel);
     }
 
-    /**
-     * Media Session Callbacks, where all external clients control the player.
-     */
-    private class SessionCallback extends MediaSessionCompat.Callback {
-        final private String TAG = RecipeInfoStepFragment.TAG + "|" + this;
-        @Override
-        public void onPlay() {
-            Log.d(TAG, "onPlay() called");
-            player.setPlayWhenReady(true);
-        }
-
-        @Override
-        public void onPause() {
-            Log.d(TAG, "onPause() called");
-            player.setPlayWhenReady(false);
-        }
-
-        @Override
-        public void onSkipToPrevious() {
-            Log.d(TAG, "onSkipToPrevious() called");
-            player.seekTo(0);
-        }
+    private NotificationManager getNotificationManager() {
+        if (getContext() == null) throw new IllegalStateException("Expected a non-null Context reference!");
+        NotificationManager notifyMgr = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
+        if (notifyMgr == null)
+            throw new IllegalStateException("Expected a non-null NotificationManager reference!");
+        return notifyMgr;
     }
 
-    /**
-     * Broadcast Receiver registered to receive the MEDIA_BUTTON intent coming from clients.
-     */
-    public static class MediaReceiver extends BroadcastReceiver {
-        private static final String TAG = RecipeInfoStepFragment.TAG + "|" + MediaReceiver.class.getSimpleName();
-        public MediaReceiver() {
-            super();
+    // https://medium.com/google-exoplayer/playback-notifications-with-exoplayer-a2f1a18cf93b
+    private class PlayerNotificationAdapter implements MediaDescriptionAdapter {
+
+        private Bitmap icon;
+
+        PlayerNotificationAdapter() {
+            icon = BitmapFactory.decodeResource(
+                    getContext().getResources(),
+                    R.drawable.ic_baseline_fastfood_24px
+            );
         }
+
         @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.d(TAG, "onReceive() called with: context = [" + context + "], intent = [" + intent + "]");
-            MediaButtonReceiver.handleIntent(MEDIA_SESSION, intent);
+        public String getCurrentContentTitle(Player player) {
+            return mNotifyTitle + " " + mStepDataId;
         }
+
+        @Nullable
+        @Override
+        public String getCurrentContentText(Player player) {
+            return mNotifyText;
+        }
+
+        @Nullable
+        @Override
+        public Bitmap getCurrentLargeIcon(
+                Player player, PlayerNotificationManager.BitmapCallback callback) {
+            return icon;
+        }
+
+        @Nullable
+        @Override
+        public PendingIntent createCurrentContentIntent(Player player) {
+            return null;
+//            return PendingIntent.getActivity(
+//                    getContext(), 0, new Intent(getContext(), getContext().getClass()), 0);
+        }
+
     }
 
 }

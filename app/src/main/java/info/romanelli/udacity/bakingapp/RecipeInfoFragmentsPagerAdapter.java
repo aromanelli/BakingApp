@@ -8,6 +8,8 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import org.greenrobot.eventbus.EventBus;
+
 import info.romanelli.udacity.bakingapp.data.StepData;
 
 public class RecipeInfoFragmentsPagerAdapter extends FragmentStatePagerAdapter {
@@ -53,6 +55,7 @@ public class RecipeInfoFragmentsPagerAdapter extends FragmentStatePagerAdapter {
 
             Bundle bundle = new Bundle();
             bundle.putParcelable(MainActivity.KEY_STEP_DATA, stepData);
+            bundle.putInt(MainActivity.KEY_STEP_DATA_ID, (stepIndex + 1)); // Step ID != Step Index
 
             // https://developer.android.com/topic/libraries/architecture/viewmodel#sharing
             RecipeInfoStepFragment fragment = new RecipeInfoStepFragment();
@@ -70,6 +73,17 @@ public class RecipeInfoFragmentsPagerAdapter extends FragmentStatePagerAdapter {
             count++;
         }
         return count;
+    }
+
+    public void postEvent(Object event) {
+        /*
+        Need to do a postSticky, and not post, because RecipeInfoStepActivity does not have
+        this adapter instantiate the fragment until after it posts the selection event,
+        where RecipeInfoActivity lets this adapter pre-instantiate fragments ahead of time,
+        so when RecipeInfoActivity does an event, they hear it and act on it.  We need the
+        future instantiated fragment that is the target of this event, get this event.
+         */
+        EventBus.getDefault().postSticky(event);
     }
 
 }

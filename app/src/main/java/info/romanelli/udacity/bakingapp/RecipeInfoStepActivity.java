@@ -7,11 +7,13 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 
 import java.util.List;
 
 import info.romanelli.udacity.bakingapp.data.StepData;
+import info.romanelli.udacity.bakingapp.event.StepDataEvent;
 
 /**
  * An activity representing a single RecipeInfo detail screen. This
@@ -19,11 +21,12 @@ import info.romanelli.udacity.bakingapp.data.StepData;
  * item details are presented side-by-side with a list of items
  * in a {@link RecipeInfoActivity}.
  */
-public class RecipeInfoStepActivity extends AppCompatActivity {
+public class RecipeInfoStepActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener {
 
     final static private String TAG = RecipeInfoStepActivity.class.getSimpleName();
 
     private ViewPager mPager;
+    private RecipeInfoFragmentsPagerAdapter mPagerAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,25 +59,27 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
         // (https://developer.android.com/training/animation/screen-slide)
         mPager = findViewById(R.id.pager);
         if (mPager != null) { // Only our 'two pane' tablet view has a pager, phone view does not!
-            mPager.setAdapter(
-                    new RecipeInfoFragmentsPagerAdapter(
-                            getSupportFragmentManager(), this, false)
-            );
+            mPagerAdapter = new RecipeInfoFragmentsPagerAdapter(
+                    getSupportFragmentManager(), this, false);
+            mPager.setAdapter(mPagerAdapter);
             // mPager.setOffscreenPageLimit(mPagerAdapter.getCount());
+            mPager.addOnPageChangeListener(this);
 
             // Set the right page, based on the StepData set into the view model by the recycler view adapter ...
             List<StepData> listStepData =
                     ViewModelProviders.of(this).get(DataViewModel.class).getRecipeData().getSteps();
             int index = listStepData.indexOf(ViewModelProviders.of(this).get(DataViewModel.class).getStepData());
-            if (index < 0) {
-                throw new IllegalStateException("Bad index for StepData!");
+            if (index >= 0) {
+                setCurrentPage(index);
+                // On first setCurrentPage, listener not called sometimes, so we make sure ...
+                updateSelectedInfo(index);
             }
-            setCurrentPage(index);
         }
 
     }
 
     protected void setCurrentPage(final int index) {
+        Log.d(TAG, "setCurrentPage() called with: index = [" + index + "]");
         if (mPager != null) {
             mPager.setCurrentItem(index);
         }
@@ -115,6 +120,32 @@ public class RecipeInfoStepActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        mPager.removeOnPageChangeListener(this);
         super.onDestroy();
     }
+
+    @Override
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+    }
+
+    @Override
+    public void onPageSelected(int position) {
+        Log.d(TAG, "onPageSelected() called with: position = [" + position + "]");
+        updateSelectedInfo(position);
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int state) {
+    }
+
+    private void updateSelectedInfo(int position) {
+        final StepData stepData = ViewModelProviders.of(this).get(DataViewModel.class)
+                    .getRecipeData().getSteps().get(position); // From this activity, position, not position -1 !
+        ViewModelProviders.of(this).get(DataViewModel.class)
+                .setStepData(stepData);
+        mPagerAdapter.postEvent( // (See RecipeInfoActivity)
+                new StepDataEvent(StepDataEvent.Type.SELECTED, position, stepData)
+        );
+    }
+
 }

@@ -47,11 +47,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="info.romanelli.udacity.bakingapp.RecipeInfoActivity" />
         </activity>
-        <receiver android:name=".RecipeInfoStepFragment$MediaReceiver">
-            <intent-filter>
-                <action android:name="android.intent.action.MEDIA_BUTTON" />
-            </intent-filter>
-        </receiver>
     </application>
 
 </manifest>

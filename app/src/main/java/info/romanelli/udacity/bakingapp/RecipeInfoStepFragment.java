@@ -3,6 +3,7 @@ package info.romanelli.udacity.bakingapp;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -267,19 +268,20 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
 
     private void initializePlayer() {
 
-        if (getContext() == null)
-            throw new IllegalStateException("Expected a non-null getContext() value!");
-
         // Don't init player if there's no media to show it ...
         if (mMediaURL != null) {
 
             if (mPlayer == null) {
 
+                if (getContext() == null)
+                    throw new IllegalStateException("Expected a non-null getContext() value!");
+                Context context = getContext().getApplicationContext();
+
                 mTrackSelector = new DefaultTrackSelector();
                 mTrackSelector.setParameters(mTrackSelectorParameters);
 
                 mPlayer = ExoPlayerFactory.newSimpleInstance(
-                        new DefaultRenderersFactory(getContext()),
+                        new DefaultRenderersFactory(context),
                         mTrackSelector,
                         new DefaultLoadControl()
                 );
@@ -289,18 +291,19 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
                 mPlayerNotificationAdapter =
                         new PlayerNotificationAdapter(mPlayer, mStepDataId, mNotifyTitle, mNotifyText);
                 PlayerNotificationManager pnm = new PlayerNotificationManager(
-                        getContext().getApplicationContext(),
+                        context,
                         MainActivity.CHANNEL_ID,
                         mStepDataId,
                         mPlayerNotificationAdapter
                 );
-                mPlayerNotificationAdapter.setPlayerNotificationManager(pnm);
+                mPlayerNotificationAdapter.setManager(pnm);
 
-                pnm.setOngoing(true);
+                pnm.setOngoing(false);
                 // pnm.setUseNavigationActions(false);
                 pnm.setFastForwardIncrementMs(0); // Remove FF
                 pnm.setStopAction(null); // Remove Stop
                 pnm.setRewindIncrementMs(0);
+                pnm.setUsePlayPauseActions(true);
 
                 // Below does a "pnm.setPlayer(mPlayer)" call ...
                 mPlayerNotificationAdapter.setNotificationState();
@@ -314,22 +317,19 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
 
                 // Prepare the MediaSource.
                 String userAgent = Util.getUserAgent(
-                        getContext(),
+                        context,
                         "RecipeInfo_" + RecipeInfoStepFragment.class.getSimpleName()
                 );
 
                 Log.d(TAG, "initializePlayer: mMediaURL: [" + mMediaURL + "]");
-                if (getContext() == null)
-                    throw new IllegalStateException("Expected a non-null Context reference!");
                 mMediaSource =
                         new ExtractorMediaSource.Factory(
-                                new DefaultDataSourceFactory(getContext(), userAgent)
+                                new DefaultDataSourceFactory(context, userAgent)
                         ).setExtractorsFactory(
                                 new DefaultExtractorsFactory()
                         ).createMediaSource(
                                 Uri.parse(mMediaURL)
                         );
-
 
             }
 
@@ -403,7 +403,7 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
             if (Player.STATE_IDLE == playbackState) {
                 mPlayerNotificationAdapter.setNotificationActive(false);
             } else if (Player.STATE_BUFFERING == playbackState) {
-                mPlayerNotificationAdapter.setNotificationActive(true); // false
+                mPlayerNotificationAdapter.setNotificationActive(false);
             } else if (Player.STATE_READY == playbackState) {
                 mPlayerNotificationAdapter.setNotificationActive(true);
             } else if (Player.STATE_ENDED == playbackState) {
@@ -600,13 +600,13 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
             if (getContext() == null)
                 throw new IllegalStateException("Expected a non-null getResources() value!");
             icon = BitmapFactory.decodeResource(
-                    getContext().getResources(),
+                    getContext().getApplicationContext().getResources(),
                     R.drawable.ic_baseline_fastfood_24px
             );
 
         }
 
-        void setPlayerNotificationManager(
+        void setManager(
                 final PlayerNotificationManager playerNotifyMgr) {
             if (playerNotifyMgr == null)
                 throw new IllegalArgumentException("Expected a non-null PlayerNotificationManager reference!");
@@ -657,6 +657,7 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
                 aPlayerNotifyMgr.setNotificationListener(null);
             }
 
+            // Setting the player to null/not-null is what actually makes the notification hide/show
             aPlayerNotifyMgr.setPlayer(active ? aPlayer : null);
         }
 

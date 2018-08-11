@@ -1,12 +1,12 @@
 package info.romanelli.udacity.bakingapp;
 
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.arch.lifecycle.ViewModelProviders;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -390,17 +390,30 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
     }
 
     private void setVideoPlayerNotificationState() {
-        if (mPlayerNotificationAdapter != null) {
-            if (isCurrentPage()) {
-                if (mPlayer.getPlaybackState() == Player.STATE_READY || mPlayer.getPlaybackState() == Player.STATE_ENDED) {
-                    mPlayerNotificationAdapter.setNotificationActive(true);
-                } else {
-                    mPlayerNotificationAdapter.setNotificationActive(false);
-                }
-            } else {
+
+        if (mPlayerNotificationAdapter != null) { // Some pages don't have video on them
+
+            if (!isCurrentPage()) {
                 mPlayerNotificationAdapter.setNotificationActive(false);
+                return;
             }
+
+            final int playbackState = mPlayer.getPlaybackState();
+
+            if (Player.STATE_IDLE == playbackState) {
+                mPlayerNotificationAdapter.setNotificationActive(false);
+            } else if (Player.STATE_BUFFERING == playbackState) {
+                mPlayerNotificationAdapter.setNotificationActive(true); // false
+            } else if (Player.STATE_READY == playbackState) {
+                mPlayerNotificationAdapter.setNotificationActive(true);
+            } else if (Player.STATE_ENDED == playbackState) {
+                mPlayerNotificationAdapter.setNotificationActive(true);
+            } else {
+                Log.w(TAG, "setVideoPlayerNotificationState: Unknown Player state! ["+ playbackState +"]");
+            }
+
         }
+
     }
 
     private class PlayerEventListener extends Player.DefaultEventListener {
@@ -564,6 +577,8 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
 
         private Bitmap icon;
 
+        private boolean flagActive = false;
+
         PlayerNotificationAdapter(final SimpleExoPlayer player, final int idStepData, final String title, final String text) {
 
             if (player == null)
@@ -613,19 +628,36 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
          * @param active Whether the {@link PlayerNotificationManager} should be showing
          *               any notifications, or not.
          */
-        void setNotificationActive(final boolean active) {
+        synchronized void setNotificationActive(final boolean active) {
+
             if (aPlayerNotifyMgr == null)
                 throw new IllegalArgumentException("Expected a non-null PlayerNotificationManager reference!");
-            // Delaying because of https://github.com/google/ExoPlayer/issues/4238
-            new Handler().postDelayed(
-                    new Runnable() {
-                        @Override
-                        public void run() {
-                            aPlayerNotifyMgr.setPlayer(active ? aPlayer : null);
-                        }
-                    },
-                    500
-            );
+
+            if ((active && flagActive) || (!active) && (!flagActive)) {
+                return;
+            }
+
+            flagActive = active;
+
+            // PlayerNotificationManager.NotificationBroadcastReceiver.onReceive(Context, Intent)
+            // does NOT get called all the time, just some times!
+            if (flagActive) {
+                aPlayerNotifyMgr.setNotificationListener(new PlayerNotificationManager.NotificationListener() {
+                    @Override
+                    public void onNotificationStarted(int notificationId, Notification notification) {
+                        Log.d(TAG, "onNotificationStarted() called with: notificationId = [" + notificationId + "], notification = [" + notification + "]");
+                    }
+
+                    @Override
+                    public void onNotificationCancelled(int notificationId) {
+                        Log.d(TAG, "onNotificationCancelled() called with: notificationId = [" + notificationId + "]");
+                    }
+                });
+            } else {
+                aPlayerNotifyMgr.setNotificationListener(null);
+            }
+
+            aPlayerNotifyMgr.setPlayer(active ? aPlayer : null);
         }
 
         @Override

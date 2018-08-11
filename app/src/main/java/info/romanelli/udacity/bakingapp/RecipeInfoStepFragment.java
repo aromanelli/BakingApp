@@ -62,6 +62,8 @@ import info.romanelli.udacity.bakingapp.event.StepDataEvent;
  */
 public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer {
 
+    // https://github.com/google/ExoPlayer/issues/4643
+
     // REVIEWER: Parts of the code below was re-purposed from ...
     //   https://github.com/google/ExoPlayer/blob/release-v2/demos/main/src/main/java/com/google/android/exoplayer2/demo/PlayerActivity.java
     //   AdvancedAndroid_ClassicalMusicQuiz:origin/TMED.06-Solution-AddMediaButtonReceiver

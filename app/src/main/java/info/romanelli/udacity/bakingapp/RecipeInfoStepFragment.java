@@ -148,11 +148,6 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
 
         }
 
-        // Important to register after we're ready to do stuff, as RecipeInfoFragmentsPagerAdapter
-        // uses the postSticky, which means the event annotated method gets called IMMEDIATELY
-        // when the register (below) gets called.  If the fragment is newly instantiated, but not
-        // had its onCreate called yet, then member vars are null when the event method is called.
-        EventBus.getDefault().register(this);
     }
 
     @Override
@@ -189,6 +184,12 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
     @Override
     public void onStart() {
         super.onStart();
+        // Important to register after we're ready to do stuff, as RecipeInfoFragmentsPagerAdapter
+        // uses the postSticky, which means the event annotated method gets called IMMEDIATELY
+        // when the register (below) gets called.  If the fragment is newly instantiated, but not
+        // had its onCreate called yet, then member vars are null when the event method is called.
+        EventBus.getDefault().register(this);
+
         if (Util.SDK_INT > 23) {
             initializePlayer();
         }

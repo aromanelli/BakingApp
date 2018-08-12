@@ -54,7 +54,7 @@ final public class RecipeData implements Parcelable {
         return mImage;
     }
 
-//    // TODO AOR REMOVE, FOR DEBUGGING PURPOSES ONLY! (See also RecipesRecyclerViewAdapter.setData(List<RecipeData>)
+//    // TODO FOR DEBUGGING PURPOSES ONLY! (See also RecipesRecyclerViewAdapter.setData(List<RecipeData>)
 //    public String setImage(final String image) {
 //        String oldImage = mImage;
 //        mImage = image;

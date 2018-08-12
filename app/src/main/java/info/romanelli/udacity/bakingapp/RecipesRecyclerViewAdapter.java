@@ -34,7 +34,7 @@ public class RecipesRecyclerViewAdapter extends RecyclerView.Adapter<RecipesRecy
         this.listRecipes = listRecipes;
 
 //        ////////////////////////////////////////////////
-//        // TODO AOR REMOVE, FOR DEBUGGING PURPOSES ONLY! (See also RecipeData.setImage(String)
+//        // TODO FOR DEBUGGING PURPOSES ONLY! (See also RecipeData.setImage(String)
 //        for (int i = 0; i < listRecipes.size(); i++) {
 //            if (i == 2) {
 //                listRecipes.get(i).setImage(

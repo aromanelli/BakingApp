@@ -27,7 +27,6 @@ public final class AppUtil {
 
     static public void showToast(final Context owner, final String message, final boolean delayShowing) {
 
-        // TODO AOR Using android.os.Handler class removes allot of below code?
         /*
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {

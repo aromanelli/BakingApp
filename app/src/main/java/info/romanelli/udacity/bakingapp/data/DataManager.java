@@ -28,7 +28,6 @@ public class DataManager {
     private DataManager(Context context) {
         mPrefs = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
         // Clear out any previous prefs ...
-        // TODO AOR Should we clear? How does this affect the Widget?
         SharedPreferences.Editor editor = mPrefs.edit();
         editor.clear();
         mRecipeData = new RecipeData(null);

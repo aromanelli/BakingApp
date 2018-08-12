@@ -671,7 +671,7 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
 
         @Override
         public String getCurrentContentTitle(Player player) {
-            return aNotifyTitle + " " + aStepDataId;
+            return aNotifyTitle + " (" + aStepDataId + ")";
         }
 
         @Nullable

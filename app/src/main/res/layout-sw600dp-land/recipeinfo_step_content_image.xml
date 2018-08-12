@@ -28,8 +28,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.75"
-        />
+        app:layout_constraintGuide_percent="0.6" />
 
     <ScrollView
         android:id="@+id/recipeinfo_step_scrollview"

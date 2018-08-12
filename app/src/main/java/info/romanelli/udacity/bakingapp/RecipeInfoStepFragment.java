@@ -62,6 +62,13 @@ import info.romanelli.udacity.bakingapp.event.StepDataEvent;
  */
 public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer {
 
+    // REVIEWER: Please note, there is a bug with the ExoPlayer notification library,
+    // that I have opened a ticket for ( https://github.com/google/ExoPlayer/issues/4643 ).
+    // Because of this bug, when you page back/forth through the fragments/steps, the
+    // notification play/rewind buttons may not respond properly.  In fact, for the later
+    // pages/fragments, it gets really flakey, but for the first few pages/fragments, it
+    // works, so you can confirm that my own code/logic is sound and functional.
+
     // REVIEWER: Parts of the code below was re-purposed from ...
     //   https://github.com/google/ExoPlayer/blob/release-v2/demos/main/src/main/java/com/google/android/exoplayer2/demo/PlayerActivity.java
     //   AdvancedAndroid_ClassicalMusicQuiz:origin/TMED.06-Solution-AddMediaButtonReceiver

@@ -1,0 +1,75 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#09C"
+    android:padding="@dimen/widget_margin">
+
+    <TextView
+        android:id="@+id/appwidget_title"
+        android:background="#FFF"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="0dp"
+        android:textAlignment="center"
+        android:paddingTop="8dp"
+        android:contentDescription="@string/appwidget_desc_title"
+        android:textSize="24sp"
+        android:textStyle="bold|italic"
+        />
+
+    <ImageView
+        android:id="@+id/appwidget_recipe_image"
+        android:background="#FFF"
+        android:layout_below="@id/appwidget_title"
+        android:layout_alignParentStart="true"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="0dp"
+        android:layout_marginBottom="0dp"
+        android:padding="8dp"
+        android:contentDescription="@string/appwidget_desc_recipe_image"
+        android:src="@drawable/ic_baseline_fastfood_24px"
+        />
+
+    <TextView
+        android:id="@+id/appwidget_recipe_title"
+        android:textSize="18sp"
+        android:textStyle="bold|italic"
+        android:background="#FFF"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@id/appwidget_title"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="0dp"
+        android:layout_toEndOf="@id/appwidget_recipe_image"
+        android:gravity="center_vertical|start"
+        android:padding="8dp"
+        android:contentDescription="@string/appwidget_desc_recipe_title" />
+
+    <TextView
+        android:id="@+id/appwidget_recipe_text"
+        android:background="#FFF"
+        android:layout_below="@id/appwidget_recipe_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_marginTop="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:padding="8dp"
+        android:contentDescription="@string/appwidget_desc_recipe_text"
+        />
+
+</RelativeLayout>

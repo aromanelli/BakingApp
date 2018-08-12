@@ -32,4 +32,10 @@
     <string name="notify_channel_name">Baking Time Notification Channel</string>
     <string name="notify_channel_desc">The notification channel that is used by the Baking Time app</string>
 
+    <string name="appwidget_desc_title">The Baking Time app widget</string>
+    <string name="appwidget_desc_card">The recipe name</string>
+    <string name="appwidget_desc_recipe_title">The title of the recipe</string>
+    <string name="appwidget_desc_recipe_image">A picture of the recipe</string>
+    <string name="appwidget_desc_recipe_text">The recipe ingredients</string>
+
 </resources>

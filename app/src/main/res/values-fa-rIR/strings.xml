@@ -33,4 +33,10 @@
     <string name="notify_channel_name">زمان پخت و پز کانال هشدار از طریق</string>
     <string name="notify_channel_desc">کانال اعلان که توسط برنامه زمان پخت استفاده می شود</string>
 
+    <string name="appwidget_desc_title">ویجت برنامه پختن زمان</string>
+    <string name="appwidget_desc_card">نام دستور غذا</string>
+    <string name="appwidget_desc_recipe_title">عنوان این دستور غذا</string>
+    <string name="appwidget_desc_recipe_image">یک تصویر از دستور غذا</string>
+    <string name="appwidget_desc_recipe_text">مواد تشکیل دهنده دستور غذا</string>
+
 </resources>

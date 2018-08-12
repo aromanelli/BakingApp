@@ -2,6 +2,7 @@ package info.romanelli.udacity.bakingapp;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.NavUtils;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
@@ -12,6 +13,8 @@ import android.view.MenuItem;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import info.romanelli.udacity.bakingapp.data.StepData;
 import info.romanelli.udacity.bakingapp.event.StepDataEvent;
 
@@ -25,7 +28,10 @@ public class RecipeInfoStepActivity extends AppCompatActivity implements ViewPag
 
     final static private String TAG = RecipeInfoStepActivity.class.getSimpleName();
 
-    private ViewPager mPager;
+    @Nullable
+    @BindView(R.id.pager)
+    ViewPager mPager;
+
     private RecipeInfoFragmentsPagerAdapter mPagerAdapter;
 
     @Override
@@ -33,6 +39,7 @@ public class RecipeInfoStepActivity extends AppCompatActivity implements ViewPag
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipeinfo_step);
+        ButterKnife.bind(this);
 
         setTitle(ViewModelProviders.of(this).get(DataViewModel.class).getRecipeData().getName());
 
@@ -57,7 +64,6 @@ public class RecipeInfoStepActivity extends AppCompatActivity implements ViewPag
 
         // Instantiate a ViewPager and a PagerAdapter ...
         // (https://developer.android.com/training/animation/screen-slide)
-        mPager = findViewById(R.id.pager);
         if (mPager != null) { // Only our 'two pane' tablet view has a pager, phone view does not!
             mPagerAdapter = new RecipeInfoFragmentsPagerAdapter(
                     getSupportFragmentManager(), this, false);
@@ -120,7 +126,9 @@ public class RecipeInfoStepActivity extends AppCompatActivity implements ViewPag
 
     @Override
     protected void onDestroy() {
-        mPager.removeOnPageChangeListener(this);
+        if (mPager != null) {
+            mPager.removeOnPageChangeListener(this);
+        }
         super.onDestroy();
     }
 

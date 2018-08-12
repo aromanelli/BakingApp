@@ -76,6 +76,9 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
     // ... as they are boiler-plate type of code, and I have been struggling with
     // getting the lifecycle of ExoPlayers's in Fragments with ViewPagers to work correctly.
 
+    // REVIEWER: Not using Butterknife in this class, as I am dynamically instantiating
+    // some controls, and not others, based on if showing a video, or image.
+
     private static final String TAG = RecipeInfoStepFragment.class.getSimpleName();
 
     private static final String MEDIA_IMAGE_NOT_VIDEO = "IMAGE_MEDIA";
@@ -509,6 +512,7 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
 
     private void createImageView(@NonNull final View rootView, String url) {
 
+        // REVIEWER: Not using Butterknife, as don't want ref if not showing image
         final ImageView ivThumbnail = rootView.findViewById(R.id.recipeinfo_step_video_thumbnail);
 
         if (AppUtil.isEmpty(url)) {
@@ -538,6 +542,7 @@ public class RecipeInfoStepFragment extends Fragment implements PlaybackPreparer
 
     private void createVideoView(@NonNull final View rootView, String url) {
         // If we have a video to show, show it ...
+        // REVIEWER: Not using Butterknife, as don't want ref if not showing video
         mPlayerView = rootView.findViewById(R.id.recipeinfo_step_video_player);
         mMediaURL = url;
     }

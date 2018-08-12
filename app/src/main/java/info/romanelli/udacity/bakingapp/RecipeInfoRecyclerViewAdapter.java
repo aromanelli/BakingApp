@@ -12,6 +12,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import info.romanelli.udacity.bakingapp.data.RecipeData;
 import info.romanelli.udacity.bakingapp.data.StepData;
 
@@ -114,10 +116,13 @@ public class RecipeInfoRecyclerViewAdapter extends RecyclerView.Adapter<RecipeIn
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
-        final TextView tvContent;
+
+        @BindView(R.id.content)
+        TextView tvContent;
+
         ViewHolder(View view) {
             super(view);
-            tvContent = view.findViewById(R.id.content);
+            ButterKnife.bind(this, itemView);
         }
     }
 

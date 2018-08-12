@@ -14,6 +14,8 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import info.romanelli.udacity.bakingapp.data.RecipeData;
 
 public class RecipesRecyclerViewAdapter extends RecyclerView.Adapter<RecipesRecyclerViewAdapter.ViewHolder> {
@@ -123,17 +125,18 @@ public class RecipesRecyclerViewAdapter extends RecyclerView.Adapter<RecipesRecy
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
+        @BindView(R.id.recipe_picture)
         ImageView ivRecipePicture;
+
+        @BindView(R.id.recipe_name)
         TextView tvRecipeName;
+
+        @BindView(R.id.recipe_servings)
         TextView tvRecipeServings;
 
         ViewHolder(View itemView) {
             super(itemView);
-
-            ivRecipePicture = itemView.findViewById(R.id.recipe_picture);
-            tvRecipeName = itemView.findViewById(R.id.recipe_name);
-            tvRecipeServings = itemView.findViewById(R.id.recipe_servings);
-
+            ButterKnife.bind(this, itemView);
             itemView.setOnClickListener(this);
         }
 

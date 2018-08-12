@@ -2,6 +2,7 @@ package info.romanelli.udacity.bakingapp;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.NavUtils;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
@@ -11,6 +12,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import info.romanelli.udacity.bakingapp.data.StepData;
 import info.romanelli.udacity.bakingapp.event.StepDataEvent;
 
@@ -28,7 +31,10 @@ public class RecipeInfoActivity extends AppCompatActivity implements ViewPager.O
 
     private boolean mTwoPane;
 
-    private ViewPager mPager;
+    @Nullable
+    @BindView(R.id.pager)
+    ViewPager mPager;
+
     private RecipeInfoFragmentsPagerAdapter mPagerAdapter;
 
     @Override
@@ -36,6 +42,7 @@ public class RecipeInfoActivity extends AppCompatActivity implements ViewPager.O
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipeinfo);
+        ButterKnife.bind(this);
 
         setTitle(ViewModelProviders.of(this).get(DataViewModel.class).getRecipeData().getName());
 
@@ -69,7 +76,6 @@ public class RecipeInfoActivity extends AppCompatActivity implements ViewPager.O
 
         // Instantiate a ViewPager and a PagerAdapter ...
         // (https://developer.android.com/training/animation/screen-slide)
-        mPager = findViewById(R.id.pager);
         if (mPager != null) { // Only our 'two pane' tablet view has a pager, phone view does not!
             mPagerAdapter = new RecipeInfoFragmentsPagerAdapter(
                     getSupportFragmentManager(), this, mTwoPane); // mTwoPane, not false!
@@ -81,7 +87,9 @@ public class RecipeInfoActivity extends AppCompatActivity implements ViewPager.O
     }
 
     protected void setCurrentPage(final int index) {
-        mPager.setCurrentItem(index);
+        if (mPager != null) {
+            mPager.setCurrentItem(index);
+        }
     }
 
     @Override

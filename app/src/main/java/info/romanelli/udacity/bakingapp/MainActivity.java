@@ -24,6 +24,8 @@ import android.widget.ImageView;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import info.romanelli.udacity.bakingapp.data.DataManager;
 import info.romanelli.udacity.bakingapp.data.RecipeData;
 import info.romanelli.udacity.bakingapp.network.NetUtil;
@@ -42,7 +44,8 @@ public class MainActivity
 
     public static final String CHANNEL_ID = "Video Player Notifications";
 
-    private RecyclerView mViewRecipes;
+    @BindView(R.id.rv_recipes)
+    RecyclerView mViewRecipes;
 
     private RecipesRecyclerViewAdapter mAdapterRecipes;
 
@@ -52,10 +55,10 @@ public class MainActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
 
         DataManager.init(this);
 
-        mViewRecipes = findViewById(R.id.rv_recipes);
         mViewRecipes.setHasFixedSize(true);
 
         // Determine how many columns of cards should be displayed.  Uses view_sizing.xml and orientation.

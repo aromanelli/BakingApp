@@ -92,20 +92,19 @@ public class RecipeInfoActivity extends AppCompatActivity implements ViewPager.O
             if (mPager.getCurrentItem() == 0) {
                 // If the user is currently looking at the first step, allow the system to handle the
                 // Back button. This calls finish() on this activity and pops the back stack.
-                super.onBackPressed();
+                NavUtils.navigateUpFromSameTask(this); // super.onBackPressed();
             } else {
                 // Otherwise, select the previous step.
                 setCurrentPage(mPager.getCurrentItem() - 1);
             }
         } else {
-            super.onBackPressed();
+            NavUtils.navigateUpFromSameTask(this); // super.onBackPressed();
         }
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == android.R.id.home) {
+        if (item.getItemId() == android.R.id.home) {
             // This ID represents the Home or Up button. In the case of this
             // activity, the Up button is shown. Use NavUtils to allow users
             // to navigate up one level in the application structure. For

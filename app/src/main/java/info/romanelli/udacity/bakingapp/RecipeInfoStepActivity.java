@@ -120,7 +120,9 @@ public class RecipeInfoStepActivity extends AppCompatActivity implements ViewPag
 
     @Override
     protected void onDestroy() {
-        mPager.removeOnPageChangeListener(this);
+        if (mPager != null) {
+            mPager.removeOnPageChangeListener(this);
+        }
         super.onDestroy();
     }
 

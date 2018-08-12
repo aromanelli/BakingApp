@@ -81,7 +81,9 @@ public class RecipeInfoActivity extends AppCompatActivity implements ViewPager.O
     }
 
     protected void setCurrentPage(final int index) {
-        mPager.setCurrentItem(index);
+        if (mPager != null) {
+            mPager.setCurrentItem(index);
+        }
     }
 
     @Override

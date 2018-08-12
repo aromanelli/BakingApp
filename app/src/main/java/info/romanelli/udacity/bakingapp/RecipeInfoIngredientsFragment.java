@@ -11,8 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import info.romanelli.udacity.bakingapp.data.IngredientData;
-
 /**
  * A fragment representing a single RecipeInfo detail screen.
  * This fragment is either contained in a
@@ -48,28 +46,15 @@ public class RecipeInfoIngredientsFragment extends Fragment {
         View rootView = inflater.inflate(
                 R.layout.recipeinfo_ingredients_content, container, false);
 
-        // Show the dummy content as text in a TextView.
-        StringBuilder builder = new StringBuilder();
         FragmentActivity activity = getActivity();
-        if (activity != null) {
-            for (IngredientData ingredientData :
-                    ViewModelProviders.of(activity).get(DataViewModel.class).getRecipeData().getIngredients()) {
-                // TODO AOR Swapping languages while in detail activity then hitting back button causes a IllegalFormatConversionException.
-                String text = getString(
-                        R.string.ingredient_detail,
-                        ingredientData.getQuantity(),
-                        ingredientData.getMeasure(),
-                        ingredientData.getIngredient()
-                );
-                builder.append(text);
-                builder.append('\n');
-            }
-        } else {
-            // TODO AOR REMOVE BELOW WHEN DESIGN FIXED
-            builder.append("Need an Activity reference to be able to display ingredients!");
-        }
+        if (activity == null)
+            throw new IllegalStateException("Expected a non-null Activity reference!");
         ((TextView) rootView.findViewById(R.id.recipeinfo_ingredients_content)).setText(
-                builder.toString()
+                AppUtil.getIngredientsText(
+                        activity,
+                        ViewModelProviders.of(activity).get(DataViewModel.class)
+                                .getRecipeData().getIngredients()
+                )
         );
 
         return rootView;

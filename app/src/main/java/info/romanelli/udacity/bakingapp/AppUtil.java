@@ -12,7 +12,10 @@ import com.google.android.exoplayer2.util.MimeTypes;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import info.romanelli.udacity.bakingapp.data.IngredientData;
 
 public final class AppUtil {
 
@@ -149,6 +152,27 @@ public final class AppUtil {
         }
 
         return flags;
+    }
+
+    static public String getIngredientsText(final Context context, final List<IngredientData> listIngredientData) {
+        final StringBuilder builder = new StringBuilder();
+        if (context != null) {
+            for (IngredientData ingredientData : listIngredientData) {
+                // Swapping languages while in detail activity then hitting back button causes a IllegalFormatConversionException.
+                String text = context.getResources().getString(
+                        R.string.ingredient_detail,
+                        ingredientData.getQuantity(),
+                        ingredientData.getMeasure(),
+                        ingredientData.getIngredient()
+                );
+                builder.append(text);
+                builder.append('\n');
+            }
+        } else {
+            builder.append("");
+            Log.w(TAG, "getIngredientsText: Need an Activity reference to be able to display ingredients!");
+        }
+        return builder.toString();
     }
 
 }

@@ -9,7 +9,7 @@ buildscript {
     dependencies {
         // Keep gradle version same as Android Studio version,
         // or else stuff in styles.xml complains.
-        classpath 'com.android.tools.build:gradle:3.1.3'
+        classpath 'com.android.tools.build:gradle:3.1.4'
         
 
         // NOTE: Do not place your application dependencies here; they belong
